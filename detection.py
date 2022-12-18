@@ -3,11 +3,13 @@ from skimage import transform
 from sklearn import svm
 
 from constants import *
-from helpers import predict_with_scores
+from helpers import predict_with_score
 from hog import hog
 
+face_type = tuple[int, int, int, int, float, float]
 
-def iou(a, b) -> float:
+
+def iou(a: face_type, b: face_type) -> float:
     x11, y11, x12, y12, *_ = a
     x21, y21, x22, y22, *_ = b
 
@@ -22,8 +24,8 @@ def iou(a, b) -> float:
     return intersection / union
 
 
-def nms(B: list, threshold: float) -> list:
-    res: list = []
+def nms(B: list[face_type], threshold: float) -> list[face_type]:
+    res: list[face_type] = []
     for bi in B:
         discard: bool = False
         for bj in B:
@@ -35,8 +37,8 @@ def nms(B: list, threshold: float) -> list:
     return res
 
 
-def detect(clf: svm.SVC, img: np.ndarray, scale: float = 1) -> list:
-    faces: list = []
+def detect(clf: svm.SVC, img: np.ndarray, scale: float = 1) -> list[face_type]:
+    faces: list[face_type] = []
     for startX in range(0, img.shape[0] - WINDOW_SHAPE[0], WINDOW_SHIFT[0]):
         endX: int = startX + WINDOW_SHAPE[0]
 
@@ -46,14 +48,14 @@ def detect(clf: svm.SVC, img: np.ndarray, scale: float = 1) -> list:
             window: np.ndarray = img[startX:endX, startY:endY]
             hog_img: np.ndarray = hog(window)
 
-            prediction, score = predict_with_scores(clf, [hog_img])
+            prediction, score = predict_with_score(clf, hog_img)
             if prediction == FACE:
                 faces.append((startX, startY, endX, endY, score, scale))
     return faces
 
 
-def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> list:
-    faces: list = []
+def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> list[face_type]:
+    faces: list[face_type] = []
     for scale in scales:
         scaled_img = transform.rescale(img, scale)
         scale_faces = detect(clf, scaled_img, scale)
@@ -75,7 +77,7 @@ def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> li
             scale,
         )
 
-    faces: list = nms(thresholded_faces, NMS_THRESHOLD)
+    faces: list[face_type] = nms(thresholded_faces, NMS_THRESHOLD)
     print(f"After NMS: {len(faces)} faces.")
 
     return faces

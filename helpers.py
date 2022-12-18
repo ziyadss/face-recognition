@@ -18,12 +18,8 @@ def directory_hogs(directory: str) -> list[np.ndarray]:
     ]
 
 
-def predict_with_scores(clf: svm.SVC, vecs) -> tuple[np.ndarray, np.ndarray]:
-    scores = clf.decision_function(vecs)
+def predict_with_score(clf: svm.SVC, vec: np.ndarray) -> tuple[int, float]:
+    score = clf.decision_function([vec])
+    idx = int(score > 0)
 
-    if len(scores.shape) == 1:
-        indices = (scores > 0).astype(int)
-    else:
-        indices = scores.argmax(axis=1)
-
-    return clf.classes_[indices], scores
+    return clf.classes_[idx], score # type: ignore
