@@ -71,16 +71,18 @@ def normalize_block(block: np.ndarray) -> np.ndarray:
     # norm = np.linalg.norm(block, ord=2)
     # return block / norm
 
+X_FILTER = np.array([[-1, 0, 1]])
+Y_FILTER = X_FILTER.T
 
 def hog(image: np.ndarray) -> np.ndarray:
-    x_filter = np.array([[-1, 0, 1]])
-    y_filter = x_filter.T
-
-    x = signal.convolve2d(image, x_filter, mode="same")
-    y = signal.convolve2d(image, y_filter, mode="same")
+    x = signal.convolve2d(image, X_FILTER, mode="same")
+    y = signal.convolve2d(image, Y_FILTER, mode="same")
 
     magnitude = np.sqrt(x ** 2 + y ** 2)
-    orientation = (np.arctan2(y, x) + ORIENTATION_OFFSET) % ORIENTATION_RANGE
+    orientation = np.arctan2(y, x)
+
+    # Lineary scale orientation to [0, ORIENTATION_RANGE)
+    orientation = (ORIENTATION_SCALE_M * orientation + ORIENTATION_SCALE_C) % ORIENTATION_RANGE
 
     h, w = image.shape
     H, W = PIXELS_PER_CELL
