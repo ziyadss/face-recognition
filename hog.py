@@ -5,23 +5,18 @@ from constants import *
 
 
 def get_histogram(magnitude: np.ndarray, orientation: np.ndarray) -> np.ndarray:
-    bins = np.zeros((NBINS,))
-    h, w = magnitude.shape
-    for i in range(h):
-        for j in range(w):
-            mag = magnitude[i, j]
-            ori = orientation[i, j]
+    bin1 = (orientation // BIN_WIDTH).astype(int)
+    bin2 = (bin1 + 1) % NBINS
+    bin1_val = bin1 * BIN_WIDTH
 
-            bin1 = int(ori / BIN_WIDTH)
-            bin2 = (bin1 + 1) % NBINS
-            bin1_val = bin1 * BIN_WIDTH
+    overflow = magnitude * (orientation - bin1_val) / BIN_WIDTH
+    non_overflow = magnitude - overflow
+    
+    bins = np.bincount(bin1, weights=non_overflow, minlength=NBINS) + np.bincount(bin2, weights=overflow, minlength=NBINS)
+    # bincount is just `for i in range(len(x)): bins[x[i]] += weights[i]`
+    # but np's implementation is in C, giving a 40% speedup than implementing it in python
 
-            overflow = (ori - bin1_val) / BIN_WIDTH
-            bins[bin1] += mag * (1 - overflow)
-            bins[bin2] += mag * overflow
-
-    return bins
-
+    return bins # type: ignore
 
 def normalize_block(block: np.ndarray) -> np.ndarray:
     # Scores below are for LinearSVC. SVC scores are slightly better.
@@ -75,8 +70,8 @@ X_FILTER = np.array([[-1, 0, 1]])
 Y_FILTER = X_FILTER.T
 
 def hog(image: np.ndarray) -> np.ndarray:
-    x = signal.convolve2d(image, X_FILTER, mode="same")
-    y = signal.convolve2d(image, Y_FILTER, mode="same")
+    x: np.ndarray = signal.convolve2d(image, X_FILTER, mode="same")
+    y: np.ndarray = signal.convolve2d(image, Y_FILTER, mode="same")
 
     magnitude = np.sqrt(x ** 2 + y ** 2)
     orientation = np.arctan2(y, x)
@@ -90,8 +85,8 @@ def hog(image: np.ndarray) -> np.ndarray:
     for i in range(0, h, H):
         histograms.append([])
         for j in range(0, w, W):
-            mag = magnitude[i : i + H, j : j + W]
-            ori = orientation[i : i + H, j : j + W]
+            mag = magnitude[i : i + H, j : j + W].flatten()
+            ori = orientation[i : i + H, j : j + W].flatten()
             cell = get_histogram(mag, ori)
             histograms[-1].append(cell)
 
