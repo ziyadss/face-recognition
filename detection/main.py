@@ -5,7 +5,7 @@ from skimage import io
 from sklearn import svm
 
 from constants import CLASSIFIER_PATH
-from detection import detect_with_scales, face_type
+from detection import detect_with_scales, box_type
 from helpers import read_as_float
 
 with open(CLASSIFIER_PATH, "rb") as fd:
@@ -16,7 +16,7 @@ scales: list[float] = [1]
 # a smaller scale gets bigger faces
 
 img: np.ndarray = read_as_float(path)
-faces: list[face_type] = detect_with_scales(clf, img, scales)
+faces: list[box_type] = detect_with_scales(clf, img, scales)
 
 img_original: np.ndarray = io.imread(path)
 for x1, y1, x2, y2, score, scale in faces:

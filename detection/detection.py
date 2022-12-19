@@ -6,10 +6,10 @@ from constants import *
 from helpers import predict_with_score
 from hog import hog
 
-face_type = tuple[int, int, int, int, float, float]
+box_type = tuple[int, int, int, int, float, float]
 
 
-def iou(a: face_type, b: face_type) -> float:
+def iou(a: box_type, b: box_type) -> float:
     x11, y11, x12, y12, *_ = a
     x21, y21, x22, y22, *_ = b
 
@@ -24,12 +24,12 @@ def iou(a: face_type, b: face_type) -> float:
     return intersection / union
 
 
-def nms(B: list[face_type], threshold: float) -> list[face_type]:
-    res: list[face_type] = []
+def nms(B: list[box_type]) -> list[box_type]:
+    res: list[box_type] = []
     for bi in B:
         discard: bool = False
         for bj in B:
-            if iou(bi, bj) > threshold:
+            if iou(bi, bj) > NMS_THRESHOLD:
                 if bj[4] > bi[4]:
                     discard = True
         if not discard:
@@ -37,8 +37,8 @@ def nms(B: list[face_type], threshold: float) -> list[face_type]:
     return res
 
 
-def detect(clf: svm.SVC, img: np.ndarray, scale: float = 1) -> list[face_type]:
-    faces: list[face_type] = []
+def detect(clf: svm.SVC, img: np.ndarray, scale: float = 1) -> list[box_type]:
+    faces: list[box_type] = []
     for startX in range(0, img.shape[0] - WINDOW_SHAPE[0], WINDOW_SHIFT[0]):
         endX: int = startX + WINDOW_SHAPE[0]
 
@@ -49,26 +49,22 @@ def detect(clf: svm.SVC, img: np.ndarray, scale: float = 1) -> list[face_type]:
             hog_img: np.ndarray = hog(window)
 
             prediction, score = predict_with_score(clf, hog_img)
-            if prediction == FACE:
+            if prediction == FACE and score > BINARY_THRESHOLD:
                 faces.append((startX, startY, endX, endY, score, scale))
-    return faces
+
+    return nms(faces)
 
 
-def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> list[face_type]:
-    faces: list[face_type] = []
+def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> list[box_type]:
+    boxes: list[box_type] = []
     for scale in scales:
         scaled_img = transform.rescale(img, scale)
-        scale_faces = detect(clf, scaled_img, scale)
-        faces.extend(scale_faces)
+        scale_boxes = detect(clf, scaled_img, scale)
+        boxes.extend(scale_boxes)
 
-    print(f"Found: {len(faces)} faces")
-
-    thresholded_faces: list = [face for face in faces if face[4] > BINARY_THRESHOLD]
-    print(f"After binary thresholding: {len(thresholded_faces)} faces.")
-
-    for i in range(len(thresholded_faces)):
-        x1, y1, x2, y2, score, scale = thresholded_faces[i]
-        thresholded_faces[i] = (
+    for i in range(len(boxes)):
+        x1, y1, x2, y2, score, scale = boxes[i]
+        boxes[i] = (
             int(np.round(x1 / scale)),
             int(np.round(y1 / scale)),
             int(np.round(x2 / scale)),
@@ -77,7 +73,7 @@ def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> li
             scale,
         )
 
-    faces: list[face_type] = nms(thresholded_faces, NMS_THRESHOLD)
-    print(f"After NMS: {len(faces)} faces.")
+    boxes = nms(boxes)
+    print(f"Found {len(boxes)} boxes")
 
-    return faces
+    return boxes
