@@ -37,29 +37,19 @@ def hog(image: np.ndarray) -> np.ndarray:
 
     h, w = image.shape
     H, W = PIXELS_PER_CELL
-    histograms = []
+    histograms = histograms = np.empty((np.ceil(h / H).astype(int), np.ceil(w / W).astype(int), NBINS))
     for i in range(0, h, H):
-        to_add = []
         for j in range(0, w, W):
             mag = magnitude[i : i + H, j : j + W].flatten()
             ori = orientation[i : i + H, j : j + W].flatten()
-            cell = get_histogram(mag, ori)
-            to_add.append(cell)
-        histograms.append(to_add)
-
-    histograms = np.array(histograms)
+            histograms[i // H, j // W] = get_histogram(mag, ori)
 
     h, w, *_ = histograms.shape
     H, W = CELLS_PER_BLOCK
-    blocks = []
+    blocks = np.empty((h - H + 1, w - W + 1, H * W * NBINS))
     for i in range(h - H + 1):
-        to_add = []
         for j in range(w - W + 1):
-            block = histograms[i : i + H, j : j + W].flatten()
-            blocks.append(block)
-        blocks.append(to_add)
-
-    blocks = np.array(blocks)
+            blocks[i, j] = histograms[i : i + H, j : j + W].flatten()
 
     norms = np.linalg.norm(blocks, axis=2, keepdims=True, ord=1)
     np.divide(blocks, norms, out=blocks, where=norms != 0)
