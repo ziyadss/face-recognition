@@ -39,7 +39,7 @@ def nms(B: list[BoxType]) -> list[BoxType]:
     for bi in B:
         for bj in B:
             if iou(bi, bj) > NMS_THRESHOLD and bj[4] > bi[4]:
-                    break
+                break
         else:
             res.append(bi)
     return res

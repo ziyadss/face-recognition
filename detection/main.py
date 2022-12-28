@@ -9,6 +9,7 @@ from constants import CLASSIFIER_PATH
 from detection import BoxType, detect_with_scales
 from helpers import read_as_float
 
+
 def detect_helper(path: str, scales: list[float]):
     start = perf_counter_ns()
 
@@ -44,6 +45,7 @@ def detect_helper(path: str, scales: list[float]):
     io.show()
 
     io.imsave("detected.jpg", img_original)
+
 
 if __name__ == "__main__":
     with open(CLASSIFIER_PATH, "rb") as fd:
