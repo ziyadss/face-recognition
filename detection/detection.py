@@ -1,3 +1,4 @@
+from typing import NamedTuple
 import numpy as np
 from skimage import transform
 from sklearn import svm
@@ -6,10 +7,17 @@ from constants import *
 from helpers import predict_with_score
 from hog import hog
 
-box_type = tuple[int, int, int, int, float, float]
+
+class BoxType(NamedTuple):
+    x1: int
+    y1: int
+    x2: int
+    y2: int
+    score: float
+    scale: float
 
 
-def iou(a: box_type, b: box_type) -> float:
+def iou(a: BoxType, b: BoxType) -> float:
     x11, y11, x12, y12, *_ = a
     x21, y21, x22, y22, *_ = b
 
@@ -24,8 +32,8 @@ def iou(a: box_type, b: box_type) -> float:
     return intersection / union
 
 
-def nms(B: list[box_type]) -> list[box_type]:
-    res: list[box_type] = []
+def nms(B: list[BoxType]) -> list[BoxType]:
+    res: list[BoxType] = []
     for bi in B:
         discard: bool = False
         for bj in B:
@@ -37,8 +45,8 @@ def nms(B: list[box_type]) -> list[box_type]:
     return res
 
 
-def detect(clf: svm.SVC, img: np.ndarray, scale: float = 1) -> list[box_type]:
-    faces: list[box_type] = []
+def detect(clf: svm.SVC, img: np.ndarray, scale: float = 1) -> list[BoxType]:
+    faces: list[BoxType] = []
     for startX in range(0, img.shape[0] - WINDOW_SHAPE[0], WINDOW_SHIFT[0]):
         endX: int = startX + WINDOW_SHAPE[0]
 
@@ -50,13 +58,13 @@ def detect(clf: svm.SVC, img: np.ndarray, scale: float = 1) -> list[box_type]:
 
             prediction, score = predict_with_score(clf, hog_img)
             if prediction == FACE and score > BINARY_THRESHOLD:
-                faces.append((startX, startY, endX, endY, score, scale))
+                faces.append(BoxType(startX, startY, endX, endY, score, scale))
 
     return nms(faces)
 
 
-def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> list[box_type]:
-    boxes: list[box_type] = []
+def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> list[BoxType]:
+    boxes: list[BoxType] = []
     for scale in scales:
         scaled_img = transform.rescale(img, scale)
         scale_boxes = detect(clf, scaled_img, scale)
@@ -64,7 +72,7 @@ def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> li
 
     for i in range(len(boxes)):
         x1, y1, x2, y2, score, scale = boxes[i]
-        boxes[i] = (
+        boxes[i] = BoxType(
             int(np.round(x1 / scale)),
             int(np.round(y1 / scale)),
             int(np.round(x2 / scale)),
