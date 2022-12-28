@@ -18,18 +18,21 @@ def detect_helper(path: str, scales: list[float]):
     end = perf_counter_ns()
     print(f"Time: {(end - start) / 1e9} seconds")
 
+    with open("faces.pkl", "wb") as fd:
+        pickle.dump(faces, fd)
+
     img_original: np.ndarray = io.imread(path)
     if img_original.ndim == 2:
         img_original = np.stack([img_original] * 3, axis=2)
     channels = img_original.shape[2]
     if channels == 3:
-        for x1, y1, x2, y2, score, scale in faces:
+        for x1, y1, x2, y2, *_ in faces:
             img_original[x1, y1:y2] = [255, 0, 0]
             img_original[x1:x2, y1] = [255, 0, 0]
             img_original[x2, y1:y2] = [255, 0, 0]
             img_original[x1:x2, y2] = [255, 0, 0]
     elif channels == 4:
-        for x1, y1, x2, y2, score, scale in faces:
+        for x1, y1, x2, y2, *_ in faces:
             img_original[x1, y1:y2, 0:3] = [255, 0, 0]
             img_original[x1:x2, y1, 0:3] = [255, 0, 0]
             img_original[x2, y1:y2, 0:3] = [255, 0, 0]
@@ -40,14 +43,14 @@ def detect_helper(path: str, scales: list[float]):
     io.imshow(img_original)
     io.show()
 
-    io.imsave("images/last_detected.jpg", img_original)
+    io.imsave("detected.jpg", img_original)
 
 if __name__ == "__main__":
     with open(CLASSIFIER_PATH, "rb") as fd:
         clf: svm.SVC = pickle.load(fd)
 
-    path: str = "images/misc/class/class.jpg"
-    scales: list[float] = [0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70]
+    path: str = "images/pic.jpg"
+    scales: list[float] = [0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
     # a smaller scale gets bigger faces
 
     detect_helper(path, scales)

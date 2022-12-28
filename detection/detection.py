@@ -37,12 +37,10 @@ def iou(a: BoxType, b: BoxType) -> float:
 def nms(B: list[BoxType]) -> list[BoxType]:
     res: list[BoxType] = []
     for bi in B:
-        discard: bool = False
         for bj in B:
-            if iou(bi, bj) > NMS_THRESHOLD:
-                if bj[4] > bi[4]:
-                    discard = True
-        if not discard:
+            if iou(bi, bj) > NMS_THRESHOLD and bj[4] > bi[4]:
+                    break
+        else:
             res.append(bi)
     return res
 
