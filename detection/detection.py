@@ -45,7 +45,7 @@ def nms(B: list[BoxType]) -> list[BoxType]:
     return res
 
 
-def detect(clf: svm.SVC, img: np.ndarray, scale: float = 1) -> list[BoxType]:
+def detect(clf: svm.SVC, img: np.ndarray, scale: float) -> list[BoxType]:
     scaled_img = transform.rescale(img, scale)
     faces: list[BoxType] = []
     for startX in range(0, scaled_img.shape[0] - WINDOW_SHAPE[0], WINDOW_SHIFT[0]):
