@@ -40,12 +40,14 @@ def detect_helper(path: str, scales: list[float]):
     io.imshow(img_original)
     io.show()
 
+    io.imsave("images/last_detected.jpg", img_original)
+
 if __name__ == "__main__":
     with open(CLASSIFIER_PATH, "rb") as fd:
         clf: svm.SVC = pickle.load(fd)
 
-    path: str = "images/pic.jpg"
-    scales: list[float] = [1, 1.1]
+    path: str = "images/misc/class/class.jpg"
+    scales: list[float] = [0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70]
     # a smaller scale gets bigger faces
 
     detect_helper(path, scales)
