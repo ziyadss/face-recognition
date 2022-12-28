@@ -63,6 +63,8 @@ def detect(clf: svm.SVC, img: np.ndarray, scale: float) -> list[BoxType]:
 
     faces = nms(faces)  # is this needed? only is nms is expensive, divide-and-conquer thing.
                         # nms is O(n^2) worst case - n^2/1000 ms to be exact, decays to O(n) - n/1000 ms to be exact if lots of discards.
+                        # if not needed, remove loop below, have de-scaling done in previous loop.
+
     for i in range(len(faces)):
         x1, y1, x2, y2, score, scale = faces[i]
         faces[i] = BoxType(
