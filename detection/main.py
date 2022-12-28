@@ -9,14 +9,7 @@ from constants import CLASSIFIER_PATH
 from detection import BoxType, detect_with_scales
 from helpers import read_as_float
 
-if __name__ == "__main__":
-    with open(CLASSIFIER_PATH, "rb") as fd:
-        clf: svm.SVC = pickle.load(fd)
-
-    path: str = "images/pic.jpg"
-    scales: list[float] = [1, 1.1]
-    # a smaller scale gets bigger faces
-
+def detect_helper(path: str, scales: list[float]):
     start = perf_counter_ns()
 
     img: np.ndarray = read_as_float(path)
@@ -44,3 +37,13 @@ if __name__ == "__main__":
 
     io.imshow(img_original)
     io.show()
+
+if __name__ == "__main__":
+    with open(CLASSIFIER_PATH, "rb") as fd:
+        clf: svm.SVC = pickle.load(fd)
+
+    path: str = "images/pic.jpg"
+    scales: list[float] = [1, 1.1]
+    # a smaller scale gets bigger faces
+
+    detect_helper(path, scales)
