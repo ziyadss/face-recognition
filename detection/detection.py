@@ -1,4 +1,6 @@
+import multiprocessing
 from typing import NamedTuple
+
 import numpy as np
 from skimage import transform
 from sklearn import svm
@@ -46,33 +48,25 @@ def nms(B: list[BoxType]) -> list[BoxType]:
 
 
 def detect(clf: svm.SVC, img: np.ndarray, scale: float = 1) -> list[BoxType]:
+    scaled_img = transform.rescale(img, scale)
     faces: list[BoxType] = []
-    for startX in range(0, img.shape[0] - WINDOW_SHAPE[0], WINDOW_SHIFT[0]):
+    for startX in range(0, scaled_img.shape[0] - WINDOW_SHAPE[0], WINDOW_SHIFT[0]):
         endX: int = startX + WINDOW_SHAPE[0]
 
-        for startY in range(0, img.shape[1] - WINDOW_SHAPE[1], WINDOW_SHIFT[1]):
+        for startY in range(0, scaled_img.shape[1] - WINDOW_SHAPE[1], WINDOW_SHIFT[1]):
             endY: int = startY + WINDOW_SHAPE[1]
 
-            window: np.ndarray = img[startX:endX, startY:endY]
+            window: np.ndarray = scaled_img[startX:endX, startY:endY]
             hog_img: np.ndarray = hog(window)
 
             prediction, score = predict_with_score(clf, hog_img)
             if prediction == FACE and score > BINARY_THRESHOLD:
                 faces.append(BoxType(startX, startY, endX, endY, score, scale))
 
-    return nms(faces)
-
-
-def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> list[BoxType]:
-    boxes: list[BoxType] = []
-    for scale in scales:
-        scaled_img = transform.rescale(img, scale)
-        scale_boxes = detect(clf, scaled_img, scale)
-        boxes.extend(scale_boxes)
-
-    for i in range(len(boxes)):
-        x1, y1, x2, y2, score, scale = boxes[i]
-        boxes[i] = BoxType(
+    faces = nms(faces)
+    for i in range(len(faces)):
+        x1, y1, x2, y2, score, scale = faces[i]
+        faces[i] = BoxType(
             int(np.round(x1 / scale)),
             int(np.round(y1 / scale)),
             int(np.round(x2 / scale)),
@@ -80,6 +74,15 @@ def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> li
             score,
             scale,
         )
+
+    return faces
+
+
+def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> list[BoxType]:
+    with multiprocessing.Pool(PROCESSES_COUNT) as pool:
+        params = ((clf, img, scale) for scale in scales)
+        nested_boxes = pool.starmap(detect, params)
+    boxes = [box for boxes in nested_boxes for box in boxes]
 
     boxes = nms(boxes)
     print(f"Found {len(boxes)} boxes")

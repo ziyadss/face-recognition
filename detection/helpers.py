@@ -16,7 +16,7 @@ def directory_hogs(directory: str) -> list[np.ndarray]:
 
 
 def predict_with_score(clf: svm.SVC, vec: np.ndarray) -> tuple[int, float]:
-    score = clf.decision_function([vec])
+    score = clf.decision_function([vec])[0]
     idx = int(score > 0)
 
-    return clf.classes_[idx], score  # type: ignore
+    return clf.classes_[idx], score
