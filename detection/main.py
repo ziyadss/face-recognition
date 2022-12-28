@@ -19,6 +19,8 @@ def detect_helper(path: str, scales: list[float]):
     print(f"Time: {(end - start) / 1e9} seconds")
 
     img_original: np.ndarray = io.imread(path)
+    if img_original.ndim == 2:
+        img_original = np.stack([img_original] * 3, axis=2)
     channels = img_original.shape[2]
     if channels == 3:
         for x1, y1, x2, y2, score, scale in faces:
