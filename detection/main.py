@@ -19,11 +19,21 @@ img: np.ndarray = read_as_float(path)
 faces: list[BoxType] = detect_with_scales(clf, img, scales)
 
 img_original: np.ndarray = io.imread(path)
-for x1, y1, x2, y2, score, scale in faces:
-    img_original[x1, y1:y2] = [255, 0, 0]
-    img_original[x1:x2, y1] = [255, 0, 0]
-    img_original[x2, y1:y2] = [255, 0, 0]
-    img_original[x1:x2, y2] = [255, 0, 0]
+channels = img_original.shape[2]
+if channels == 3:
+    for x1, y1, x2, y2, score, scale in faces:
+        img_original[x1, y1:y2] = [255, 0, 0]
+        img_original[x1:x2, y1] = [255, 0, 0]
+        img_original[x2, y1:y2] = [255, 0, 0]
+        img_original[x1:x2, y2] = [255, 0, 0]
+elif channels == 4:
+    for x1, y1, x2, y2, score, scale in faces:
+        img_original[x1, y1:y2, 0:3] = [255, 0, 0]
+        img_original[x1:x2, y1, 0:3] = [255, 0, 0]
+        img_original[x2, y1:y2, 0:3] = [255, 0, 0]
+        img_original[x1:x2, y2, 0:3] = [255, 0, 0]
+else:
+    raise ValueError("Invalid number of channels")
 
 io.imshow(img_original)
 io.show()
