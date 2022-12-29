@@ -6,7 +6,7 @@ from skimage import io, color
 from sklearn import svm
 
 from constants import CLASSIFIER_PATH
-from detection import BoxType, detect_with_scales
+from detector import BoxType, detect_with_scales
 from helpers import read_as_float
 
 

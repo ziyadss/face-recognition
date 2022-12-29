@@ -23,7 +23,6 @@ TEST_NON_FACES_DIR = "images/test/negative"
 CLASSIFIER_PATH = "classifier.pkl"
 
 ## Detection constants
-
 PROCESSES_COUNT = 4
 
 BINARY_THRESHOLD = 1
