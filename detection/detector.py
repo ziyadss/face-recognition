@@ -47,12 +47,17 @@ def nms(B: list[BoxType]) -> list[BoxType]:
 
 def detect(clf: svm.SVC, img: np.ndarray, scale: float) -> list[BoxType]:
     scaled_img = transform.rescale(img, scale)
-    faces: list[BoxType] = []
-    for startX in range(0, scaled_img.shape[0] - WINDOW_SHAPE[0], WINDOW_SHIFT[0]):
-        endX: int = startX + WINDOW_SHAPE[0]
 
-        for startY in range(0, scaled_img.shape[1] - WINDOW_SHAPE[1], WINDOW_SHIFT[1]):
-            endY: int = startY + WINDOW_SHAPE[1]
+    h, w, *_ = scaled_img.shape
+    HW, WW = WINDOW_SHAPE
+    HS, WS = WINDOW_SHIFT
+
+    faces: list[BoxType] = []
+    for startX in range(0, h - HW, HS):
+        endX: int = startX + HW
+
+        for startY in range(0, w - WW, WS):
+            endY: int = startY + WW
 
             window: np.ndarray = scaled_img[startX:endX, startY:endY]
             hog_img: np.ndarray = hog(window)

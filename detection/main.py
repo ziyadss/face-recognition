@@ -10,7 +10,7 @@ from detector import BoxType, detect_with_scales
 from helpers import read_as_float
 
 
-def detect_helper(path: str, scales: list[float]):
+def detect_helper(clf: svm.SVC, path: str, scales: list[float]):
     img: np.ndarray = read_as_float(path)
 
     start = perf_counter_ns()
@@ -47,4 +47,4 @@ if __name__ == "__main__":
     scales: list[float] = [0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
     # a smaller scale gets bigger faces
 
-    detect_helper(path, scales)
+    detect_helper(clf, path, scales)
