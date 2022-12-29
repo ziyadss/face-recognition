@@ -10,7 +10,7 @@ from detector import BoxType, detect_with_scales, get_detector
 from helpers import read_as_float
 
 IMAGE_DIR = "data/ziyad"
-IMAGE_NAME = "test.png"
+IMAGE_NAME = "image.png"
 
 
 def detect_helper(clf: svm.SVC, path: str, scales: list[float]):
