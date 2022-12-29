@@ -74,8 +74,9 @@ def detect(clf: svm.SVC, img: np.ndarray, scale: float) -> list[BoxType]:
     # faces = nms(faces)
     # is this needed? only if nms is expensive, divide-and-conquer thing.
     # nms is O(n^2) worst case - n^2/1000 ms to be exact, decays to O(n) - n/1000 ms to be exact if full of discards.
+    # (exact timings on my machine - Ziyad's Lenovo Legion)
     # so if expensive, it wont be discarding anyways, so no need to do it twice?
-    # if not needed, remove loop below, have de-scaling done in previous loop.
+    # if not needed, remove loop below, have de-scaling done in previous loop. - doing this!
 
     # for i in range(len(faces)):
     #     x1, y1, x2, y2, score, scale = faces[i]
