@@ -1,4 +1,5 @@
 import multiprocessing
+import pickle
 from typing import NamedTuple
 
 import numpy as np
@@ -107,3 +108,7 @@ def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> li
     print(f"Found {len(boxes)} boxes")
 
     return boxes
+
+def get_detector() -> svm.SVC:
+    with open(CLASSIFIER_PATH, "rb") as fd:
+        return pickle.load(fd)

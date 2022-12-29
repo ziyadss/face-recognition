@@ -5,9 +5,11 @@ import numpy as np
 from skimage import color, io
 from sklearn import svm
 
-from constants import CLASSIFIER_PATH
-from detector import BoxType, detect_with_scales
+from detector import BoxType, detect_with_scales, get_detector
 from helpers import read_as_float
+
+IMAGE_DIR = "data/ziyad"
+IMAGE_NAME = "test.png"
 
 
 def detect_helper(clf: svm.SVC, path: str, scales: list[float]):
@@ -18,7 +20,7 @@ def detect_helper(clf: svm.SVC, path: str, scales: list[float]):
     end = perf_counter_ns()
     print(f"Time: {(end - start) / 1e9} seconds")
 
-    with open(CLASSIFIER_PATH, "wb") as fd:
+    with open(f"{IMAGE_DIR}/faces.pkl", "wb") as fd:
         pickle.dump(faces, fd)
 
     img_original: np.ndarray = io.imread(path)
@@ -33,18 +35,17 @@ def detect_helper(clf: svm.SVC, path: str, scales: list[float]):
         img_original[x2, y1:y2, 0:3] = [255, 0, 0]
         img_original[x1:x2, y2, 0:3] = [255, 0, 0]
 
+    io.imsave(f"{IMAGE_DIR}/detected.jpg", img_original)
+
     io.imshow(img_original)
     io.show()
 
-    io.imsave("detection/detected.jpg", img_original)
-
 
 if __name__ == "__main__":
-    with open(CLASSIFIER_PATH, "rb") as fd:
-        clf: svm.SVC = pickle.load(fd)
+    clf: svm.SVC = get_detector()
 
-    path: str = "detection/images/pic.jpg"
-    scales: list[float] = [0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
+    path: str = f"{IMAGE_DIR}/{IMAGE_NAME}"
+    scales: list[float] = [0.25, 0.30, 0.35, 0.40, 0.45]
     # a smaller scale gets bigger faces
 
     detect_helper(clf, path, scales)
