@@ -1,6 +1,6 @@
 import multiprocessing
 import pickle
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 import numpy as np
 from skimage import transform
@@ -46,14 +46,14 @@ def nms(B: list[BoxType]) -> list[BoxType]:
     return res
 
 
-def detect(clf: svm.SVC, img: np.ndarray, scale: float) -> list[BoxType]:
+def detect(clf: svm.SVC, img: np.ndarray, scale: float, item: Any) -> list[BoxType]:
     scaled_img = transform.rescale(img, scale)
 
     h, w, *_ = scaled_img.shape
     HW, WW = WINDOW_SHAPE
     HS, WS = WINDOW_SHIFT
 
-    faces: list[BoxType] = []
+    boxes: list[BoxType] = []
     for startX in range(0, h - HW, HS):
         endX: int = startX + HW
 
@@ -64,9 +64,9 @@ def detect(clf: svm.SVC, img: np.ndarray, scale: float) -> list[BoxType]:
             hog_img: np.ndarray = hog(window)
 
             prediction, score = predict_with_score(clf, hog_img)
-            if prediction == FACE and score > BINARY_THRESHOLD:
+            if prediction == item and score > BINARY_THRESHOLD:
                 # faces.append(BoxType(startX, startY, endX, endY, score, scale))
-                faces.append(
+                boxes.append(
                     BoxType(
                         int(np.round(startX / scale)),
                         int(np.round(startY / scale)),
@@ -77,16 +77,16 @@ def detect(clf: svm.SVC, img: np.ndarray, scale: float) -> list[BoxType]:
                     )
                 )
 
-    # faces = nms(faces)
+    # boxes = nms(boxes)
     # is this needed? only if nms is expensive, divide-and-conquer thing.
     # nms is O(n^2) worst case - n^2/1000 ms to be exact, decays to O(n) - n/1000 ms to be exact if full of discards.
     # (exact timings on my machine - Ziyad's Lenovo Legion)
     # so if expensive, it wont be discarding anyways, so no need to do it twice?
     # if not needed, remove loop below, have de-scaling done in previous loop. - doing this!
 
-    # for i in range(len(faces)):
-    #     x1, y1, x2, y2, score, scale = faces[i]
-    #     faces[i] = BoxType(
+    # for i in range(len(boxes)):
+    #     x1, y1, x2, y2, score, scale = boxes[i]
+    #     boxes[i] = BoxType(
     #         int(np.round(x1 / scale)),
     #         int(np.round(y1 / scale)),
     #         int(np.round(x2 / scale)),
@@ -95,12 +95,12 @@ def detect(clf: svm.SVC, img: np.ndarray, scale: float) -> list[BoxType]:
     #         scale,
     #     )
 
-    return faces
+    return boxes
 
 
-def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> list[BoxType]:
+def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float], item: Any) -> list[BoxType]:
     with multiprocessing.Pool(PROCESSES_COUNT) as pool:
-        params = ((clf, img, scale) for scale in scales)
+        params = ((clf, img, scale, item) for scale in scales)
         nested_boxes = pool.starmap(detect, params)
     boxes = [box for boxes in nested_boxes for box in boxes]
 
@@ -108,6 +108,7 @@ def detect_with_scales(clf: svm.SVC, img: np.ndarray, scales: list[float]) -> li
     print(f"Found {len(boxes)} boxes")
 
     return boxes
+
 
 def get_detector() -> svm.SVC:
     with open(CLASSIFIER_PATH, "rb") as fd:

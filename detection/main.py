@@ -5,6 +5,7 @@ import numpy as np
 from skimage import color, io
 from sklearn import svm
 
+from constants import FACE
 from detector import BoxType, detect_with_scales, get_detector
 from helpers import read_as_float
 
@@ -16,7 +17,7 @@ def detect_helper(clf: svm.SVC, path: str, scales: list[float]):
     img: np.ndarray = read_as_float(path)
 
     start = perf_counter_ns()
-    faces: list[BoxType] = detect_with_scales(clf, img, scales)
+    faces: list[BoxType] = detect_with_scales(clf, img, scales, FACE)
     end = perf_counter_ns()
     print(f"Time: {(end - start) / 1e9} seconds")
 
@@ -39,6 +40,8 @@ def detect_helper(clf: svm.SVC, path: str, scales: list[float]):
 
     io.imshow(img_original)
     io.show()
+
+    return faces
 
 
 if __name__ == "__main__":
