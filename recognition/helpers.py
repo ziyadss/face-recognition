@@ -3,7 +3,7 @@ import os
 import cv2
 import numpy as np
 
-from constants import CLASSIFIER_PATH
+from .constants import CLASSIFIER_PATH
 
 
 def asColumns(X: np.ndarray) -> np.ndarray:

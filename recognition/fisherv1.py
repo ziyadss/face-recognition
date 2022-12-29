@@ -2,8 +2,6 @@ import numpy as np
 from sklearn.feature_selection import SelectKBest
 from sklearn.svm import SVC
 
-from helpers import asColumns
-
 
 def pca(X: np.ndarray, k: int, staderdize: bool = False) -> np.ndarray:
     """
