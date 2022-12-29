@@ -11,15 +11,14 @@ from helpers import read_as_float
 
 
 def detect_helper(path: str, scales: list[float]):
-    start = perf_counter_ns()
-
     img: np.ndarray = read_as_float(path)
-    faces: list[BoxType] = detect_with_scales(clf, img, scales)
 
+    start = perf_counter_ns()
+    faces: list[BoxType] = detect_with_scales(clf, img, scales)
     end = perf_counter_ns()
     print(f"Time: {(end - start) / 1e9} seconds")
 
-    with open("faces.pkl", "wb") as fd:
+    with open(CLASSIFIER_PATH, "wb") as fd:
         pickle.dump(faces, fd)
 
     img_original: np.ndarray = io.imread(path)
@@ -37,14 +36,14 @@ def detect_helper(path: str, scales: list[float]):
     io.imshow(img_original)
     io.show()
 
-    io.imsave("detected.jpg", img_original)
+    io.imsave("detection/detected.jpg", img_original)
 
 
 if __name__ == "__main__":
     with open(CLASSIFIER_PATH, "rb") as fd:
         clf: svm.SVC = pickle.load(fd)
 
-    path: str = "images/pic.jpg"
+    path: str = "detection/images/pic.jpg"
     scales: list[float] = [0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
     # a smaller scale gets bigger faces
 

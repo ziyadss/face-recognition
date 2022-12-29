@@ -14,13 +14,13 @@ ORIENTATION_SCALE_M = ORIENTATION_SCALE_C / np.pi
 FACE = 1
 NON_FACE = -1
 
-TRAIN_FACES_DIR = "images/train/positive"
-TRAIN_NON_FACES_DIR = "images/train/negative"
+TRAIN_FACES_DIR = "detection/images/train/positive"
+TRAIN_NON_FACES_DIR = "detection/images/train/negative"
 
-TEST_FACES_DIR = "images/test/positive"
-TEST_NON_FACES_DIR = "images/test/negative"
+TEST_FACES_DIR = "detection/images/test/positive"
+TEST_NON_FACES_DIR = "detection/images/test/negative"
 
-CLASSIFIER_PATH = "classifier.pkl"
+CLASSIFIER_PATH = "detection/classifier.pkl"
 
 ## Detection constants
 PROCESSES_COUNT = 4
