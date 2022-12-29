@@ -65,7 +65,7 @@ def detect(clf: svm.SVC, img: np.ndarray, scale: float, item: Any) -> list[BoxTy
 
             prediction, score = predict_with_score(clf, hog_img)
             if prediction == item and score > BINARY_THRESHOLD:
-                # faces.append(BoxType(startX, startY, endX, endY, score, scale))
+                # boxes.append(BoxType(startX, startY, endX, endY, score, scale))
                 boxes.append(
                     BoxType(
                         int(np.round(startX / scale)),
