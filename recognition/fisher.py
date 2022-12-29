@@ -49,4 +49,4 @@ class fisherfaces2:
         print(f"lda: {self.lda.scalings_.shape}")
         print(f"pca: {self.pca.components_.shape}")
         print(f"dot: {(self.lda.scalings_ * self.pca.components_[:,:10]).shape}")
-        return self.lda.scalings_ * self.pca.components_[:,:10]
+        return self.lda.scalings_ * self.pca.components_[:, :10]
