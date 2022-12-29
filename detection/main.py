@@ -2,7 +2,7 @@ import pickle
 from time import perf_counter_ns
 
 import numpy as np
-from skimage import io, color
+from skimage import color, io
 from sklearn import svm
 
 from constants import CLASSIFIER_PATH
