@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from sklearn.metrics import accuracy_score
+
 from constants import TESTING_PATH, TRAINING_PATH
 from helpers import gaborize, prepare_data
 

@@ -1,8 +1,8 @@
 import os
-from typing import List
 
 import cv2
 import numpy as np
+
 from constants import CLASSIFIER_PATH
 
 

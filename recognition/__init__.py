@@ -1,10 +1,10 @@
-import cv2
-import fisher
 import numpy as np
-from constants import TESTING_PATH, TRAINING_PATH
-from helpers import gaborize, prepare_data
 from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC
+
+import fisher
+from constants import TESTING_PATH, TRAINING_PATH
+from helpers import prepare_data
 
 detected_faces, face_labels = prepare_data(TRAINING_PATH)
 

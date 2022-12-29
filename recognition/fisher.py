@@ -1,7 +1,4 @@
-from typing import Tuple
-
 import numpy as np
-from helpers import asColumns, histogram_equalization
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.preprocessing import StandardScaler
