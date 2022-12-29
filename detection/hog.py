@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import signal
 
-from constants import *
+from .constants import *
 
 
 def get_histogram(magnitude: np.ndarray, orientation: np.ndarray) -> np.ndarray:
