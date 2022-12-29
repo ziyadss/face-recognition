@@ -6,9 +6,9 @@ import numpy as np
 from skimage import transform
 from sklearn import svm
 
-from constants import *
-from helpers import predict_with_score
-from hog import hog
+from .constants import *
+from .helpers import predict_with_score
+from .hog import hog
 
 
 class BoxType(NamedTuple):

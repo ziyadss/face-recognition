@@ -3,8 +3,8 @@ from time import perf_counter_ns
 
 from sklearn import svm
 
-from constants import *
-from helpers import directory_hogs
+from .constants import *
+from .helpers import directory_hogs
 
 print("Getting train vectors\n")
 start = perf_counter_ns()

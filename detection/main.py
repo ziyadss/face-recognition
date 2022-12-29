@@ -5,9 +5,9 @@ import numpy as np
 from skimage import color, io
 from sklearn import svm
 
-from constants import FACE
-from detector import BoxType, detect_with_scales, get_detector
-from helpers import read_as_float
+from .constants import FACE
+from .detector import BoxType, detect_with_scales, get_detector
+from .helpers import read_as_float
 
 IMAGE_DIR = "data/ziyad"
 IMAGE_NAME = "image.png"

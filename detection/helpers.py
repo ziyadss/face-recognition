@@ -4,7 +4,7 @@ import numpy as np
 from skimage import io, util
 from sklearn import svm
 
-from hog import hog
+from .hog import hog
 
 
 def read_as_float(path: str) -> np.ndarray:
