@@ -12,7 +12,10 @@ def read_as_float(path: str) -> np.ndarray:
 
 
 def directory_hogs(directory: str) -> list[np.ndarray]:
-    return [hog(read_as_float(os.path.join(directory, file))) for file in os.listdir(directory)]
+    return [
+        hog(read_as_float(os.path.join(directory, file)))
+        for file in os.listdir(directory)
+    ]
 
 
 def predict_with_score(clf: svm.SVC, vec: np.ndarray) -> tuple[int, float]:

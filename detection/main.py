@@ -3,21 +3,19 @@ from time import perf_counter_ns
 
 import numpy as np
 from skimage import color, io
-from sklearn import svm
 
-from .constants import FACE
-from .detector import BoxType, detect_with_scales, get_detector
+from .detector import BoxType, FaceDetector
 from .helpers import read_as_float
 
 IMAGE_DIR = "data/ziyad"
 IMAGE_NAME = "image.png"
 
 
-def detect_helper(clf: svm.SVC, path: str, scales: list[float]):
+def detect_helper(detector: FaceDetector, path: str, scales: list[float]):
     img: np.ndarray = read_as_float(path)
 
     start = perf_counter_ns()
-    faces: list[BoxType] = detect_with_scales(clf, img, scales, FACE)
+    faces: list[BoxType] = detector.detect(img, scales)
     end = perf_counter_ns()
     print(f"Time: {(end - start) / 1e9} seconds")
 
@@ -45,10 +43,10 @@ def detect_helper(clf: svm.SVC, path: str, scales: list[float]):
 
 
 if __name__ == "__main__":
-    clf: svm.SVC = get_detector()
+    detector: FaceDetector = FaceDetector()
 
     path: str = f"{IMAGE_DIR}/{IMAGE_NAME}"
     scales: list[float] = [0.25, 0.30, 0.35, 0.40, 0.45]
     # a smaller scale gets bigger faces
 
-    detect_helper(clf, path, scales)
+    detect_helper(detector, path, scales)
