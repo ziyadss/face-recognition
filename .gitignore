@@ -1,3 +1,5 @@
+lfw_funneled
+lfw-deepfunneled
 # Visual Studio Code
 .vscode/*
 !.vscode/settings.json

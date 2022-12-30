@@ -3,9 +3,8 @@ from typing import Optional
 
 import cv2
 import numpy as np
-from skimage import io, transform, util
+from skimage import io, util
 
-from detection.detector import FaceDetector
 from recognition.constants import CLASSIFIER_PATH
 
 
@@ -25,33 +24,22 @@ def detect_face_opencv(input_img):
 
 def prepare_data(
     path: str,
-    scales: list[float],
-    size: tuple[int, int] = (21, 21),
-    start: Optional[int] = None,
-    limit: Optional[int] = None,
+    skip: Optional[int] = None,
+    take: Optional[int] = None,
 ) -> tuple[list[np.ndarray], list[str]]:
-    detector = FaceDetector()
-    detected_faces: list[np.ndarray] = []
-    face_labels: list[str] = []
-    image_dirs = os.listdir(path)
-    for dir_name in image_dirs:
-        label = dir_name
-        images_path = path + "/" + dir_name
+    images: list[np.ndarray] = []
+    labels: list[str] = []
+
+    for dir in os.listdir(path):
+        label = dir
+        images_path = os.path.join(path, dir)
         images_names = os.listdir(images_path)
 
-        for image_name in images_names[start:limit]:
-            image_path = images_path + "/" + image_name
-            # image = cv2.imread(image_path)
-            # face, _ = detect_face_opencv(image)
+        for image_name in images_names[skip:take]:
+            image_path = os.path.join(images_path, image_name)
             image = read_as_float(image_path)
-            detected = detector.detect(image, scales)
-            faces = [image[x1:x2, y1:y2] for x1, y1, x2, y2, *_ in detected]
-            # if face is not None:
-            for face in faces:
-                resized_face = transform.resize(face, size).flatten()
-                detected_faces.append(resized_face)
-                face_labels.append(label)
 
-    return detected_faces, face_labels
+            images.append(image)
+            labels.append(label)
 
-    return features, np.array(face_labels)
+    return images, labels
