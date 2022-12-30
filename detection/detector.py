@@ -119,8 +119,5 @@ class FaceDetector:
         else:
             return self._detect_with_scales(img, scales)
 
-    def detect_one(self, img: np.ndarray, scales: list[float] | float) -> BoxType:
-        boxes = self.detect(img, scales)
-        if not boxes:
-            raise ValueError("No faces detected in detect_one")
-        return max(boxes, key=lambda box: box.score)
+    def extract(self, img: np.ndarray, boxes: list[BoxType]) -> list[np.ndarray]:
+        return [np.copy(img[x1:x2, y1:y2]) for x1, y1, x2, y2, *_ in boxes]
