@@ -1,5 +1,5 @@
 import numpy as np
-from skimage import io, transform, util
+from skimage import io, util
 
 from detection.detector import FaceDetector
 from helpers import prepare_data
