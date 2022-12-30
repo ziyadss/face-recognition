@@ -17,7 +17,7 @@ def read_as_float(path: str) -> np.ndarray:
 
 if __name__ == "__main__":
     scales = [0.25, 0.30, 0.35, 0.40, 0.45]
-    size = 39
+    size = (39, 39)
     cutoff = 5
 
     training_faces, training_labels = prepare_data(

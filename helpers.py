@@ -1,5 +1,5 @@
 import os
-from typing import List, Tuple, Union
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -25,14 +25,14 @@ def detect_face_opencv(input_img):
 
 def prepare_data(
     path: str,
-    scales: List[float],
-    size: int = 21,
-    start: Union[int, None] = None,
-    limit: Union[int, None] = None,
-) -> Tuple[np.ndarray, np.ndarray]:
+    scales: list[float],
+    size: tuple[int, int] = (21, 21),
+    start: Optional[int] = None,
+    limit: Optional[int] = None,
+) -> tuple[np.ndarray, np.ndarray]:
     detector = FaceDetector()
-    detected_faces: List[np.ndarray] = []
-    face_labels: List[str] = []
+    detected_faces: list[np.ndarray] = []
+    face_labels: list[str] = []
     image_dirs = os.listdir(path)
     for dir_name in image_dirs:
         label = dir_name
@@ -47,8 +47,12 @@ def prepare_data(
             detected = detector.detect(image, scales)
             faces = [image[x1:x2, y1:y2] for x1, y1, x2, y2, *_ in detected]
             # if face is not None:
+            if len(faces) == 0:
+                print(f"No face detected in {image_path}")
+            elif len(faces) > 1:
+                print(f"More than one face detected in {image_path}")
             for face in faces:
-                resized_face = transform.resize(face, (size, size))
+                resized_face = transform.resize(face, size)
                 detected_faces.append(resized_face)
                 face_labels.append(label)
 
