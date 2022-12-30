@@ -4,7 +4,7 @@ from time import perf_counter_ns
 import numpy as np
 from skimage import color, io
 
-from .detector import BoxType, FaceDetector
+from .detector import FaceDetector
 from .helpers import read_as_float
 
 IMAGE_DIR = "data/ziyad"
@@ -15,7 +15,7 @@ def detect_helper(detector: FaceDetector, path: str, scales: list[float]):
     img: np.ndarray = read_as_float(path)
 
     start = perf_counter_ns()
-    faces: list[BoxType] = detector.detect(img, scales)
+    faces = detector.detect(img, scales)
     end = perf_counter_ns()
     print(f"Time: {(end - start) / 1e9} seconds")
 
