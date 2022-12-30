@@ -114,5 +114,7 @@ class FaceDetector:
     def detect(self, img: np.ndarray, scales: list[float] | float) -> list[BoxType]:
         if isinstance(scales, float):
             return __class__._nms(self._detect(img, scales))
+        elif len(scales) == 1:
+            return __class__._nms(self._detect(img, scales[0]))
         else:
             return self._detect_with_scales(img, scales)

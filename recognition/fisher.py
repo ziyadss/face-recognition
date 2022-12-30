@@ -32,3 +32,8 @@ class fisherfaces:
         X_standardized = self.scaler.transform(X)
         X_pca = self.pca.transform(X_standardized)
         return self.lda.predict(X_pca)
+
+    def score(self, X: np.ndarray, y: np.ndarray) -> Any:
+        X_standardized = self.scaler.transform(X)
+        X_pca = self.pca.transform(X_standardized)
+        return self.lda.score(X_pca, y)
