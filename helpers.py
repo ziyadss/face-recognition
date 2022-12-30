@@ -47,10 +47,6 @@ def prepare_data(
             detected = detector.detect(image, scales)
             faces = [image[x1:x2, y1:y2] for x1, y1, x2, y2, *_ in detected]
             # if face is not None:
-            if len(faces) == 0:
-                print(f"No face detected in {image_path}")
-            elif len(faces) > 1:
-                print(f"More than one face detected in {image_path}")
             for face in faces:
                 resized_face = transform.resize(face, size)
                 detected_faces.append(resized_face)
