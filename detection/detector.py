@@ -118,3 +118,9 @@ class FaceDetector:
             return __class__._nms(self._detect(img, scales[0]))
         else:
             return self._detect_with_scales(img, scales)
+
+    def detect_one(self, img: np.ndarray, scales: list[float] | float) -> BoxType:
+        boxes = self.detect(img, scales)
+        if not boxes:
+            raise ValueError("No faces detected in detect_one")
+        return max(boxes, key=lambda box: box.score)

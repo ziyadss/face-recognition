@@ -2,13 +2,13 @@ import numpy as np
 from skimage import transform
 
 
-class PreprocessorConfig:
+class PreprocessorConfiguration:
     def __init__(self, output_shape: tuple[int, int]):
         self.output_shape = output_shape
 
 
 class Preprocessor:
-    def __init__(self, config):
+    def __init__(self, config: PreprocessorConfiguration):
         self.config = config
 
     def preprocess(self, images: list[np.ndarray]) -> list[np.ndarray]:
