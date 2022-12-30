@@ -1,8 +1,8 @@
 import pickle
 
 import numpy as np
-from skimage import io
 from cv2 import face
+from skimage import io
 
 from detection.detector import BoxType
 
