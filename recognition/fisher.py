@@ -1,6 +1,5 @@
 from typing import Any
 
-import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.preprocessing import StandardScaler
@@ -12,7 +11,7 @@ class FisherRecognizer:
         self.pca = PCA(n_components=0.95, svd_solver="full")
         self.lda = LinearDiscriminantAnalysis(solver="svd")
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
+    def fit(self, X: list, y: list) -> None:
         # Histogram Equalization
         # X_equalized = histogram_equalization(X)
 
@@ -26,14 +25,14 @@ class FisherRecognizer:
         # Perform Linear Discriminant Analysis on the reduced data
         self.lda.fit(X_pca, y)
 
-    def predict(self, X: np.ndarray) -> Any:
+    def predict(self, X: list) -> Any:
         # X_equalized = histogram_equalization(X)
         # X_standardized = self.scaler.transform(X_equalized)
         X_standardized = self.scaler.transform(X)
         X_pca = self.pca.transform(X_standardized)
         return self.lda.predict(X_pca)
 
-    def score(self, X: np.ndarray, y: np.ndarray) -> Any:
+    def score(self, X: list, y: list) -> Any:
         X_standardized = self.scaler.transform(X)
         X_pca = self.pca.transform(X_standardized)
         return self.lda.score(X_pca, y)

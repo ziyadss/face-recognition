@@ -51,7 +51,6 @@ if __name__ == "__main__":
     print(score)
 
     score = recognizer.score(
-        np.concatenate((training_faces, extra_faces)),
-        np.concatenate((training_labels, extra_labels)),
+        training_faces + extra_faces, training_labels + extra_labels
     )
     print(score)

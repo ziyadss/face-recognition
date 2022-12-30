@@ -19,6 +19,8 @@ def detect_helper(detector: FaceDetector, path: str, scales: list[float]):
     end = perf_counter_ns()
     print(f"Time: {(end - start) / 1e9} seconds")
 
+    print(faces)
+
     with open(f"{IMAGE_DIR}/faces.pkl", "wb") as fd:
         pickle.dump(faces, fd)
 
@@ -35,9 +37,6 @@ def detect_helper(detector: FaceDetector, path: str, scales: list[float]):
         img_original[x1:x2, y2, 0:3] = [255, 0, 0]
 
     io.imsave(f"{IMAGE_DIR}/detected.jpg", img_original)
-
-    io.imshow(img_original)
-    io.show()
 
     return faces
 

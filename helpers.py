@@ -29,7 +29,7 @@ def prepare_data(
     size: tuple[int, int] = (21, 21),
     start: Optional[int] = None,
     limit: Optional[int] = None,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[list[np.ndarray], list[str]]:
     detector = FaceDetector()
     detected_faces: list[np.ndarray] = []
     face_labels: list[str] = []
@@ -48,11 +48,10 @@ def prepare_data(
             faces = [image[x1:x2, y1:y2] for x1, y1, x2, y2, *_ in detected]
             # if face is not None:
             for face in faces:
-                resized_face = transform.resize(face, size)
+                resized_face = transform.resize(face, size).flatten()
                 detected_faces.append(resized_face)
                 face_labels.append(label)
 
-    features = np.array(detected_faces)
-    features = features.reshape(features.shape[0], -1)
+    return detected_faces, face_labels
 
     return features, np.array(face_labels)
