@@ -2,7 +2,9 @@ import numpy as np
 from skimage import io, transform, util
 
 from detection.detector import FaceDetector
-from recognition.fisher import fisherfaces
+from helpers import prepare_data
+from recognition.constants import TESTING_PATH, TRAINING_PATH
+from recognition.fisher import FisherRecognizer
 
 IMAGE_DIR = "data/ziyad"
 IMAGE_NAME = "image.png"
@@ -14,41 +16,42 @@ def read_as_float(path: str) -> np.ndarray:
 
 
 if __name__ == "__main__":
-    detector = FaceDetector()
-
-    img: np.ndarray = read_as_float(IMAGE_PATH)
     scales = [0.25, 0.30, 0.35, 0.40, 0.45]
+    size = 39
+    cutoff = 5
 
-    faces = detector.detect(img, scales)
+    training_faces, training_labels = prepare_data(
+        TRAINING_PATH, scales, size=size, start=None, limit=cutoff
+    )
+    extra_faces, extra_labels = prepare_data(
+        TRAINING_PATH, scales, size=size, start=cutoff, limit=None
+    )
+    testing_faces, testing_labels = prepare_data(
+        TESTING_PATH, scales, size=size, start=None, limit=None
+    )
 
-    cropped_faces = [img[x1:x2, y1:y2] for x1, y1, x2, y2, *_ in faces]
+    recognizer = FisherRecognizer()
 
-    RECOGNIZER_SIZE = (39, 39)
-    cropped_faces = [transform.resize(face, RECOGNIZER_SIZE) for face in cropped_faces]
+    recognizer.fit(training_faces, training_labels)
 
-    A = "Alvaro Uribe"
-    B = "George W Bush"
-    C = "Amelia Vega"
+    results = recognizer.predict(testing_faces)
 
-    labels = [A, A, A, B, B, B, C, C, C]
-
-    train_idx = [0, 1, 3, 4, 6, 7]
-    test_idx = [2, 5, 8]
-
-    train_faces = np.array([cropped_faces[i].flatten() for i in train_idx])
-    train_labels = np.array([labels[i] for i in train_idx])
-
-    test_faces = np.array([cropped_faces[i].flatten() for i in test_idx])
-    test_labels = np.array([labels[i] for i in test_idx])
-
-    recognizer = fisherfaces()
-
-    recognizer.fit(train_faces, train_labels)
-
-    results = recognizer.predict(test_faces)
-
-    print(test_labels)
+    print(testing_labels)
     print(results)
 
-    score = recognizer.score(test_faces, test_labels)
+    score = recognizer.score(testing_faces, testing_labels)
+    print(score)
+
+    results = recognizer.predict(extra_faces)
+
+    print(extra_labels)
+    print(results)
+
+    score = recognizer.score(extra_faces, extra_labels)
+    print(score)
+
+    score = recognizer.score(
+        np.concatenate((training_faces, extra_faces)),
+        np.concatenate((training_labels, extra_labels)),
+    )
     print(score)

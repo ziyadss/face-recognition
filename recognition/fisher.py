@@ -6,7 +6,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.preprocessing import StandardScaler
 
 
-class fisherfaces:
+class FisherRecognizer:
     def __init__(self) -> None:
         self.scaler = StandardScaler()
         self.pca = PCA(n_components=0.95, svd_solver="full")
