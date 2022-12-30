@@ -1,7 +1,7 @@
 import pickle
 from time import perf_counter_ns
 
-from sklearn import svm
+from sklearn import metrics, svm
 
 from .constants import *
 from .helpers import directory_hogs
@@ -41,3 +41,13 @@ test_labels = [FACE] * len(faces_hog) + [NON_FACE] * len(non_faces_hog)
 print(f"\nTesting on {len(test_data)} images")
 test_score = clf.score(test_data, test_labels)
 print(f"Score: {test_score}")
+
+
+def predict(vec):
+    score = clf.decision_function(vec)
+    idx = (score > BINARY_THRESHOLD).astype(int)
+    return clf.classes_[idx]
+
+
+new_score = metrics.accuracy_score(test_labels, predict(test_data))
+print(f"Thresholded score: {new_score}")

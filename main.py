@@ -1,20 +1,56 @@
-import pickle
-
 import numpy as np
-from skimage import io
+from skimage import io, util
 
-from detection.detector import BoxType
+from detection.detector import FaceDetector
+from helpers import prepare_data
+from recognition.constants import TESTING_PATH, TRAINING_PATH
+from recognition.fisher import FisherRecognizer
 
 IMAGE_DIR = "data/ziyad"
 IMAGE_NAME = "image.png"
 IMAGE_PATH = f"{IMAGE_DIR}/{IMAGE_NAME}"
 
+
+def read_as_float(path: str) -> np.ndarray:
+    return util.img_as_float(io.imread(path, as_gray=True))
+
+
 if __name__ == "__main__":
-    img: np.ndarray = io.imread(IMAGE_PATH)
-    with open(f"{IMAGE_DIR}/faces.pkl", "rb") as fd:
-        faces: list[BoxType] = pickle.load(fd)
+    scales = [0.25, 0.30, 0.35, 0.40, 0.45]
+    size = (39, 39)
+    cutoff = 5
 
-    cropped_faces = [img[x1:x2, y1:y2] for x1, y1, x2, y2, *_ in faces]
+    training_faces, training_labels = prepare_data(
+        TRAINING_PATH, scales, size=size, start=None, limit=cutoff
+    )
+    extra_faces, extra_labels = prepare_data(
+        TRAINING_PATH, scales, size=size, start=cutoff, limit=None
+    )
+    testing_faces, testing_labels = prepare_data(
+        TESTING_PATH, scales, size=size, start=None, limit=None
+    )
 
-    for i, face in enumerate(cropped_faces):
-        io.imsave(f"{IMAGE_DIR}/faces/face_{i}.jpg", face)
+    recognizer = FisherRecognizer()
+
+    recognizer.fit(training_faces, training_labels)
+
+    results = recognizer.predict(testing_faces)
+
+    print(testing_labels)
+    print(results)
+
+    score = recognizer.score(testing_faces, testing_labels)
+    print(score)
+
+    results = recognizer.predict(extra_faces)
+
+    print(extra_labels)
+    print(results)
+
+    score = recognizer.score(extra_faces, extra_labels)
+    print(score)
+
+    score = recognizer.score(
+        training_faces + extra_faces, training_labels + extra_labels
+    )
+    print(score)

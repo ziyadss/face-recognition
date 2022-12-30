@@ -33,11 +33,15 @@ def hog(image: np.ndarray) -> np.ndarray:
     orientation = np.arctan2(y, x)
 
     # Lineary scale orientation to [0, ORIENTATION_RANGE)
-    orientation = (ORIENTATION_SCALE_M * orientation + ORIENTATION_SCALE_C) % ORIENTATION_RANGE
+    orientation = (
+        ORIENTATION_SCALE_M * orientation + ORIENTATION_SCALE_C
+    ) % ORIENTATION_RANGE
 
     h, w = image.shape
     H, W = PIXELS_PER_CELL
-    histograms = histograms = np.empty((np.ceil(h / H).astype(int), np.ceil(w / W).astype(int), NBINS))
+    histograms = histograms = np.empty(
+        (np.ceil(h / H).astype(int), np.ceil(w / W).astype(int), NBINS)
+    )
     for i in range(0, h, H):
         for j in range(0, w, W):
             mag = magnitude[i : i + H, j : j + W].flatten()

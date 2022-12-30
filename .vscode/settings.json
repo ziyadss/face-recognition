@@ -1,4 +1,5 @@
 {
     "python.analysis.typeCheckingMode": "basic",
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "python.linting.pylintArgs": ["--extension-pkg-whitelist=cv2", "--generated-members=cv2.*"]
 }
