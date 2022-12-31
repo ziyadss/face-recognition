@@ -29,14 +29,6 @@ def normalize_block(block: np.ndarray) -> np.ndarray:
         return block
     return np.sqrt(block / norm)
 
-    # # L2-sqrt norm
-    # # pi : 0.9844329132690882
-    # # 2pi: 0.991475166790215
-    # norm = np.linalg.norm(block, ord=2)
-    # if norm == 0:
-    #     return block
-    # return np.sqrt(block / norm)
-
     # # L2-hys norm
     # # pi : 0.9873980726464048
     # # 2pi: 0.9903632320237212
