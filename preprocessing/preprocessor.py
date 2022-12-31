@@ -3,8 +3,7 @@ from collections.abc import Iterator
 
 import cv2
 import numpy as np
-from skimage import transform
-from skimage.filters import gaussian
+from skimage import transform, filters
 
 from common import utils
 
@@ -75,7 +74,7 @@ class Preprocessor:
 
     def _singleRetinex(self, img: np.ndarray, sigma: int) -> np.ndarray:
         img[np.where(img == 0)] = 0.001
-        retinex: np.ndarray = np.log10(img) - np.log10(gaussian(img, sigma))
+        retinex: np.ndarray = np.log10(img) - np.log10(filters.gaussian(img, sigma))
 
         return retinex
 
@@ -90,8 +89,7 @@ class Preprocessor:
 
         R_images: list[np.ndarray] = [R1_SSR, R2_SSR, R3_SSR]
         # Calculate the luminence image
-        Y = np.dot(image[:,:,:3], [0.299, 0.587, 0.114])
-
+        Y = np.dot(image[:, :, :3], [0.299, 0.587, 0.114])
 
         p_0, p_1, p_2, p_3 = (
             np.ones((x, y)),
@@ -102,7 +100,10 @@ class Preprocessor:
 
         p_1 = np.exp(-(Y - mu_1) / (2 * sigma**2))
         p_2 = np.exp(-(Y - mu_2) / (2 * sigma**2))
-        p_3 = np.maximum(np.exp(-(Y - mu_3) / (2 * sigma**2)), np.exp(-(Y - mu_0) / (2 * sigma**2)))
+        p_3 = np.maximum(
+            np.exp(-(Y - mu_3) / (2 * sigma**2)),
+            np.exp(-(Y - mu_0) / (2 * sigma**2)),
+        )
 
         weights: np.ndarray = np.zeros((4, x, y))
 
@@ -124,7 +125,9 @@ class Preprocessor:
             mask2 = (R_image >= percentile_1) & (R_image <= percentile_99)
             mask3 = R_image < percentile_1
             Y_image[mask1] = 255
-            Y_image[mask2] = 255 * (R_image[mask2] - percentile_1) / (percentile_99 - percentile_1)
+            Y_image[mask2] = (
+                255 * (R_image[mask2] - percentile_1) / (percentile_99 - percentile_1)
+            )
             Y_image[mask3] = 0
 
         Y_AMSR: np.ndarray = np.zeros((x, y))
