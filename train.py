@@ -12,6 +12,7 @@ from recognition.fisher import FisherRecognizer
 
 NON_FACES_COUNT = 1
 TRAIN_TO_TEST_RATIO = 5
+RATIO_MOD = TRAIN_TO_TEST_RATIO + 1
 IMAGES_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
 
 i = 0
@@ -23,7 +24,7 @@ with open("data/filtered_information.csv", "r") as fd:
 
     for row in reader:
         i += 1
-        if i % TRAIN_TO_TEST_RATIO != 0:
+        if i % RATIO_MOD != 0:
             training_data.append(row)
         else:
             testing_data.append(row)
