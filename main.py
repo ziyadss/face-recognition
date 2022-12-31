@@ -2,7 +2,7 @@ from skimage import io
 
 from common import utils
 from detection.detector import FaceDetector
-from preprocessing.preprocessor import Preprocessor
+# from preprocessing.preprocessor import Preprocessor
 from recognition.fisher import FisherRecognizer
 
 IMAGE_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
@@ -24,15 +24,15 @@ if __name__ == "__main__":
     for i, face in enumerate(faces):
         io.imsave(f"face_{i}.jpg", face)
 
-    from preprocessing.alignment import align
+    # from preprocessing.alignment import align
 
-    out = align(faces[0])
-    io.imsave("aligned.png", out)
+    # out = align(faces[0])
+    # io.imsave("aligned.png", out)
     # preprocessor = Preprocessor()
     # faces = preprocessor.preprocess(faces)
 
-    # recognizer = FisherRecognizer()
-    # recognizer.load()
-    # predictions = recognizer.predict(faces)
+    recognizer = FisherRecognizer()
+    recognizer.load()
+    predictions = recognizer.predict(faces)
 
-    # print(predictions)
+    print(predictions)

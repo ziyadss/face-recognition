@@ -1,17 +1,18 @@
 import pickle
 
-from sklearn.decomposition import PCA
+import numpy as np
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.preprocessing import StandardScaler
 
 from .constants import CLASSIFIER_PATH
+from .pca import PCA
 
 
 class FisherRecognizer:
-    def __init__(self):
-        self.scaler: StandardScaler = StandardScaler()
-        self.pca: PCA = PCA(n_components=0.95, svd_solver="full")
-        self.lda: LinearDiscriminantAnalysis = LinearDiscriminantAnalysis(solver="svd")
+    def __init__(self) -> None:
+        self.pca = PCA(n_components=0.95)
+        self.lda = LinearDiscriminantAnalysis(solver="svd")
+        self.mean = None
+        self.std = None
 
     def load(self, path: str = CLASSIFIER_PATH):
         with open(path, "rb") as fd:
@@ -21,9 +22,23 @@ class FisherRecognizer:
         with open(path, "wb") as fd:
             pickle.dump((self.scaler, self.pca, self.lda), fd)
 
+    def scale(self, X: list) -> list:
+        if self.mean is None or self.std is None:
+            # Calculate the mean of each column
+            self.mean = np.mean(X, axis=0)
+
+            # Calculate the standard deviation of each column
+            self.std = np.std(X, axis=0)
+
+        # Standardize the data
+        X_standardized = (X - self.mean) / self.std  # type: ignore
+
+        return X_standardized
+
     def fit(self, X: list, y: list):
         # Standardize the data
-        X_standardized = self.scaler.fit_transform(X)
+        # X_standardized = self.scaler.fit_transform(X_equalized)
+        X_standardized = self.scale(X)
 
         # Perform PCA to reduce the dimensionality of the data
         X_pca = self.pca.fit_transform(X_standardized)
@@ -32,11 +47,11 @@ class FisherRecognizer:
         self.lda.fit(X_pca, y)
 
     def predict(self, X: list):
-        X_standardized = self.scaler.transform(X)
+        X_standardized = self.scale(X)
         X_pca = self.pca.transform(X_standardized)
         return self.lda.predict(X_pca)
 
     def score(self, X: list, y: list):
-        X_standardized = self.scaler.transform(X)
+        X_standardized = self.scale(X)
         X_pca = self.pca.transform(X_standardized)
         return self.lda.score(X_pca, y)
