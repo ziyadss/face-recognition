@@ -68,7 +68,7 @@ def process_data(data):
 detector = FaceDetector()
 preprocessor = Preprocessor()
 recognizer = FisherRecognizer()
-cv2_recognizer = cv2.face.LBPHFaceRecognizer_create(radius=1, neighbors=8)
+cv2_recognizer = cv2.face.EigenFaceRecognizer_create()
 
 # Train
 start = perf_counter_ns()
