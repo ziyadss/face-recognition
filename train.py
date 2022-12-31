@@ -104,7 +104,7 @@ print(
     f"Testing faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds"
 )
 
-# detector.load()
+detector.load()
 # recognizer.load()
 
 detector_score = detector.test(faces, non_faces)
