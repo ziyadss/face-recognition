@@ -154,9 +154,9 @@ class Preprocessor:
         ## flattened = (image.flatten() for image in resized)
         grayed = (utils.color2gray(image) for image in images)
         
-        resized = (utils.color2gray(image) for image in grayed)
+        resized = (transform.resize(image, OUTPUT_SHAPE) for image in grayed)
 
-        resized_color = (utils.color2gray(image) for image in images)
+        resized_color = (transform.resize(image, OUTPUT_SHAPE) for image in images)
 
         normalized = (self.AMSR(image, greyScaleImage) for image, greyScaleImage in zip(resized, resized_color))
 
