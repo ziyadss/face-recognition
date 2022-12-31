@@ -90,14 +90,8 @@ class Preprocessor:
 
         R_images: list[np.ndarray] = [R1_SSR, R2_SSR, R3_SSR]
         # Calculate the luminence image
-        Y: np.ndarray = np.zeros((x, y))
-        for i in range(x):
-            for j in range(y):
-                Y[i][j] = (
-                    0.299 * image[i][j][0]
-                    + 0.587 * image[i][j][1]
-                    + 0.114 * image[i][j][2]
-                )
+        Y = np.dot(image[:,:,:3], [0.299, 0.587, 0.114])
+
 
         p_0, p_1, p_2, p_3 = (
             np.ones((x, y)),
@@ -106,31 +100,16 @@ class Preprocessor:
             np.ones((x, y)),
         )
 
-        for i in range(x):
-            for j in range(y):
-                p_1[i][j] = np.exp(
-                    -(Y[i][j] - mu_1) / (2 * sigma**2)
-                )  # Small scale retinex SSR p
-                p_2[i][j] = np.exp(
-                    -(Y[i][j] - mu_2) / (2 * sigma**2)
-                )  # Medium-scale retinex SSR p
-                p_3[i][j] = max(
-                    np.exp(-(Y[i][j] - mu_3) / (2 * sigma**2)),
-                    np.exp(-(Y[i][j] - mu_0) / (2 * sigma**2)),
-                )  # Large scale retinex SSR p
+        p_1 = np.exp(-(Y - mu_1) / (2 * sigma**2))
+        p_2 = np.exp(-(Y - mu_2) / (2 * sigma**2))
+        p_3 = np.maximum(np.exp(-(Y - mu_3) / (2 * sigma**2)), np.exp(-(Y - mu_0) / (2 * sigma**2)))
 
         weights: np.ndarray = np.zeros((4, x, y))
 
         probabilities: list[np.ndarray] = [p_0, p_1, p_2, p_3]
 
         for s in range(4):
-            for i in range(x):
-                for j in range(y):
-                    weights[s][i][j] = probabilities[s][i][j] / (
-                        probabilities[0][i][j]
-                        + probabilities[1][i][j]
-                        + probabilities[2][i][j]
-                    )
+            weights[s] = probabilities[s] / np.sum(probabilities[:3], axis=0)
 
         Y1_SSR: np.ndarray = np.zeros((x, y))
         Y2_SSR: np.ndarray = np.zeros((x, y))
@@ -141,20 +120,12 @@ class Preprocessor:
         for Y_image, R_image in zip(Y_images, R_images):
             percentile_99 = np.percentile(R_image, 99)
             percentile_1 = np.percentile(R_image, 1)
-            for i in range(x):
-                for j in range(y):
-                    if R_image[i][j] > percentile_99:
-                        Y_image[i][j] = 255
-                    elif (
-                        R_image[i][j] >= percentile_1 and R_image[i][j] <= percentile_99
-                    ):
-                        Y_image[i][j] = (
-                            255
-                            * (R_image[i][j] - percentile_1)
-                            / (percentile_99 - percentile_1)
-                        )
-                    else:
-                        Y_image[i][j] = 0
+            mask1 = R_image > percentile_99
+            mask2 = (R_image >= percentile_1) & (R_image <= percentile_99)
+            mask3 = R_image < percentile_1
+            Y_image[mask1] = 255
+            Y_image[mask2] = 255 * (R_image[mask2] - percentile_1) / (percentile_99 - percentile_1)
+            Y_image[mask3] = 0
 
         Y_AMSR: np.ndarray = np.zeros((x, y))
 
@@ -189,7 +160,7 @@ class Preprocessor:
 
         normalized = (
             self.AMSR(image, greyScaleImage)
-            for image, greyScaleImage in zip(resized, resized_color)
+            for image, greyScaleImage in zip(resized_color, resized)
         )
 
         flattened = (image.flatten() for image in normalized)
