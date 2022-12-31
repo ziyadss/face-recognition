@@ -53,7 +53,7 @@ class FaceDetector:
         test_data = faces_hog + non_faces_hog
         test_labels = [FACE] * len(faces_hog) + [NON_FACE] * len(non_faces_hog)
 
-        return metrics.accuracy_score(test_labels, self._predict(test_data))
+        return self.clf.score(test_data, test_labels)
 
     @staticmethod
     def _iou(a: BoxType, b: BoxType) -> float:
