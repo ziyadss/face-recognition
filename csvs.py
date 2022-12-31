@@ -47,6 +47,9 @@ with open("data/information.csv", "r") as fd:
 # Filter to identities with 30 or more files
 identity_files = {k: v for k, v in identity_files.items() if len(v) >= 30}
 
+# get 60 identities with the most files
+identity_files = dict(sorted(identity_files.items(), key=lambda x: len(x[1]), reverse=True)[:60])
+
 # Print total size
 total_size = sum(size for row in identity_files.values() for _, _, _, _, _, size in row)
 print(f"Total size: {total_size / 1024 / 1024:.2f} MB")

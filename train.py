@@ -1,4 +1,5 @@
 import csv
+from time import perf_counter_ns
 
 import numpy as np
 from skimage import transform
@@ -67,28 +68,44 @@ def process_data(data):
 detector = FaceDetector()
 preprocessor = Preprocessor()
 recognizer = FisherRecognizer()
-
+cv2_recognizer = cv2.face.LBPHFaceRecognizer_create(radius=1, neighbors=8)
 
 # Train
+start = perf_counter_ns()
 faces, non_faces, labels = process_data(training_data)
-print(f"Training faces: {len(faces)}, non-faces: {len(non_faces)}")
+end = perf_counter_ns()
+print(f"Training faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds")
 
-detector.train(faces, non_faces)
-detector.dump()
+# start = perf_counter_ns()
+# detector.train(faces, non_faces)
+# detector.dump()
+# end = perf_counter_ns()
+# print(f"Detector training time: {(end - start) / 1e9} seconds")
 
+start = perf_counter_ns()
 preprocessed_faces = preprocessor.preprocess(faces)
+end = perf_counter_ns()
+print(f"Preprocessing time: {(end - start) / 1e9} seconds")
 
+start = perf_counter_ns()
 recognizer.fit(preprocessed_faces, labels)
 recognizer.dump()
+end = perf_counter_ns()
+print(f"Recognizer training time: {(end - start) / 1e9} seconds")
 
-recog = cv2.face.FisherFaceRecognizer_create()
-recog.train(np.array(preprocessed_faces), np.array(labels))
+start = perf_counter_ns()
+cv2_recognizer.train(np.array(preprocessed_faces), np.array(labels))
+end = perf_counter_ns()
+print(f"OpenCV Recognizer training time: {(end - start) / 1e9} seconds")
 
 # Test
+start = perf_counter_ns()
+faces, non_faces, labels = process_data(testing_data)
+end = perf_counter_ns()
+print(f"Testing faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds")
+
 detector.load()
 recognizer.load()
-faces, non_faces, labels = process_data(testing_data)
-print(f"Testing faces: {len(faces)}, non-faces: {len(non_faces)}")
 
 detector_score = detector.test(faces, non_faces)
 preprocessed_faces = preprocessor.preprocess(faces)
@@ -102,6 +119,6 @@ count = sum(1 for i in range(len(labels)) if labels[i] == preds[i])
 print(f"Predictions: {count}/{len(labels)}")
 
 # cv2 face recognition
-preds = [recog.predict(f)[0] for f in preprocessed_faces]
+preds = [cv2_recognizer.predict(f)[0] for f in preprocessed_faces]
 count = sum(1 for i in range(len(labels)) if labels[i] == preds[i])
 print(f"Predictions: {count}/{len(labels)}")
