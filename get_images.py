@@ -1,11 +1,11 @@
 import csv
-import shutil
 import os
+import shutil
 
 SRC_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
 DST_DIR = "C:/Users/ziyad/Downloads/PICS"
 
-with open("data/filtered_information.csv", 'r') as fd:
+with open("data/filtered_information.csv", "r") as fd:
     reader = csv.reader(fd)
     next(reader)
 

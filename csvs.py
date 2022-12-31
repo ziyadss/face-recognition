@@ -1,7 +1,9 @@
 import csv
 from collections import defaultdict
+from time import perf_counter_ns
 
 from skimage import io
+
 from get_image_size import get_image_metadata
 
 IMAGES_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
@@ -19,6 +21,7 @@ IMAGES_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
 #             combined_row = boxes_row + identities_row[1:]
 #             output_writer.writerow(combined_row)
 
+start = perf_counter_ns()
 identity_files = defaultdict(list)
 with open("data/information.csv", "r") as fd:
     reader = csv.reader(fd)
@@ -51,6 +54,7 @@ with open("data/information.csv", "r") as fd:
 
         identity = row[5]
         identity_files[identity].append((file, x1, y1, w, h, size))
+end = perf_counter_ns()
 
 print("Before count filter:")
 # Print total size
