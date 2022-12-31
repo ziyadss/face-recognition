@@ -52,14 +52,7 @@ with open("data/information.csv", "r") as fd:
         identity = row[5]
         identity_files[identity].append((file, x1, y1, w, h, size))
 
-# Filter to identities with 30 or more files
-identity_files = {k: v for k, v in identity_files.items() if len(v) >= 30}
-
-# get 60 identities with the most files
-identity_files = dict(
-    sorted(identity_files.items(), key=lambda x: len(x[1]), reverse=True)[:60]
-)
-
+print("Before count filter:")
 # Print total size
 total_size = sum(size for row in identity_files.values() for _, _, _, _, _, size in row)
 print(f"Total size: {total_size / 1024 / 1024:.2f} MB")
@@ -69,6 +62,36 @@ print(f"Total files: {file_count}")
 
 identity_count = len(identity_files)
 print(f"Total identities: {identity_count}")
+
+# # Filter to identities with 30 or more files
+# identity_files = {k: v for k, v in identity_files.items() if len(v) >= 30}
+
+# print("Before most filter:")
+# # Print total size
+# total_size = sum(size for row in identity_files.values() for _, _, _, _, _, size in row)
+# print(f"Total size: {total_size / 1024 / 1024:.2f} MB")
+
+# file_count = sum(len(v) for v in identity_files.values())
+# print(f"Total files: {file_count}")
+
+# identity_count = len(identity_files)
+# print(f"Total identities: {identity_count}")
+
+# # get 60 identities with the most files
+# identity_files = dict(
+#     sorted(identity_files.items(), key=lambda x: len(x[1]), reverse=True)[:80]
+# )
+
+# print("After most filter:")
+# # Print total size
+# total_size = sum(size for row in identity_files.values() for _, _, _, _, _, size in row)
+# print(f"Total size: {total_size / 1024 / 1024:.2f} MB")
+
+# file_count = sum(len(v) for v in identity_files.values())
+# print(f"Total files: {file_count}")
+
+# identity_count = len(identity_files)
+# print(f"Total identities: {identity_count}")
 
 # Write the filtered identities to a file
 with open("data/filtered_information.csv", "w") as fd:

@@ -1,7 +1,6 @@
 import csv
 from time import perf_counter_ns
 
-import cv2
 import numpy as np
 from skimage import io, transform
 
@@ -70,7 +69,6 @@ def process_data(data):
 detector = FaceDetector()
 preprocessor = Preprocessor()
 recognizer = FisherRecognizer()
-cv2_recognizer = cv2.face.EigenFaceRecognizer_create()
 
 # Train
 start = perf_counter_ns()
@@ -97,11 +95,6 @@ recognizer.dump()
 end = perf_counter_ns()
 print(f"Recognizer training time: {(end - start) / 1e9} seconds")
 
-start = perf_counter_ns()
-cv2_recognizer.train(np.array(preprocessed_faces), np.array(labels))
-end = perf_counter_ns()
-print(f"OpenCV Recognizer training time: {(end - start) / 1e9} seconds")
-
 # Test
 start = perf_counter_ns()
 colored, faces, non_faces, labels = process_data(testing_data)
@@ -110,8 +103,8 @@ print(
     f"Testing faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds"
 )
 
-detector.load()
-recognizer.load()
+# detector.load()
+# recognizer.load()
 
 detector_score = detector.test(faces, non_faces)
 preprocessed_faces = preprocessor.preprocess(colored)
@@ -119,12 +112,3 @@ recognizer_score = recognizer.score(preprocessed_faces, labels)
 
 print(f"Detector score: {detector_score}")
 print(f"Recognizer score: {recognizer_score}")
-
-preds = recognizer.predict(preprocessed_faces)
-count = sum(1 for i in range(len(labels)) if labels[i] == preds[i])
-print(f"Predictions: {count}/{len(labels)}")
-
-# cv2 face recognition
-preds = [cv2_recognizer.predict(f)[0] for f in preprocessed_faces]
-count = sum(1 for i in range(len(labels)) if labels[i] == preds[i])
-print(f"Predictions: {count}/{len(labels)}")

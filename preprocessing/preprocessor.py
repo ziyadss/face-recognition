@@ -148,23 +148,18 @@ class Preprocessor:
     ) -> list[np.ndarray]:
         # aligned = (self.align(image) for image in images)
 
-        # grayed = (utils.color2gray(image) for image in aligned)
+        # # this can't be a generator expression since it's used twice
+        # resized = list(transform.resize(image, OUTPUT_SHAPE) for image in aligned)
 
-        ## grayed = (utils.color2gray(image) for image in images)
-        ##
-        ## resized = (transform.resize(image, OUTPUT_SHAPE) for image in grayed)
-        ##
-        ## flattened = (image.flatten() for image in resized)
-        grayed = (utils.color2gray(image) for image in images)
+        # resized_gray = (utils.color2gray(image) for image in resized)
 
-        resized = (transform.resize(image, OUTPUT_SHAPE) for image in grayed)
+        # normalized = (
+        #     self.AMSR(image, greyScaleImage)
+        #     for image, greyScaleImage in zip(resized, resized_gray)
+        # )
 
-        resized_color = (transform.resize(image, OUTPUT_SHAPE) for image in images)
+        resized = (transform.resize(image, OUTPUT_SHAPE) for image in images)
 
-        normalized = (
-            self.AMSR(image, greyScaleImage)
-            for image, greyScaleImage in zip(resized_color, resized)
-        )
+        flattened = (image.flatten() for image in resized)
 
-        flattened = (image.flatten() for image in normalized)
         return list(flattened)
