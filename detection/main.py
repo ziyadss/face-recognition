@@ -4,22 +4,21 @@ from time import perf_counter_ns
 import numpy as np
 from skimage import color, io
 
+from common import utils
+
 from .detector import FaceDetector
-from .helpers import read_as_float
 
 IMAGE_DIR = "data/ziyad"
 IMAGE_NAME = "image.png"
 
 
 def detect_helper(detector: FaceDetector, path: str, scales: list[float]):
-    img: np.ndarray = read_as_float(path)
+    img: np.ndarray = utils.read_as_float(path)
 
     start = perf_counter_ns()
     faces = detector.detect(img, scales)
     end = perf_counter_ns()
     print(f"Time: {(end - start) / 1e9} seconds")
-
-    print(faces)
 
     with open(f"{IMAGE_DIR}/faces.pkl", "wb") as fd:
         pickle.dump(faces, fd)
@@ -43,9 +42,10 @@ def detect_helper(detector: FaceDetector, path: str, scales: list[float]):
 
 if __name__ == "__main__":
     detector: FaceDetector = FaceDetector()
+    detector.load()
 
     path: str = f"{IMAGE_DIR}/{IMAGE_NAME}"
-    scales: list[float] = [0.25, 0.30, 0.35, 0.40, 0.45]
+    scales: list[float] = [0.25]
     # a smaller scale gets bigger faces
 
     detect_helper(detector, path, scales)

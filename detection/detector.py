@@ -1,13 +1,13 @@
 import multiprocessing
 import pickle
+from collections.abc import Iterable
 from typing import NamedTuple
 
 import numpy as np
 from skimage import transform
-from sklearn import svm
+from sklearn import metrics, svm
 
 from .constants import *
-from .helpers import predict_with_score
 from .hog import hog
 
 
@@ -21,9 +21,39 @@ class BoxType(NamedTuple):
 
 
 class FaceDetector:
-    def __init__(self) -> None:
-        with open(CLASSIFIER_PATH, "rb") as fd:
+    def __init__(self):
+        self.clf: svm.SVC = svm.SVC()
+
+    def dump(self, path: str = CLASSIFIER_PATH):
+        with open(path, "wb") as fd:
+            pickle.dump(self.clf, fd)
+
+    def load(self, path: str = CLASSIFIER_PATH):
+        with open(path, "rb") as fd:
             self.clf: svm.SVC = pickle.load(fd)
+
+    def train(self, faces: Iterable[np.ndarray], non_faces: Iterable[np.ndarray]):
+        faces_hog = [hog(face) for face in faces]
+        non_faces_hog = [hog(non_face) for non_face in non_faces]
+
+        train_data = faces_hog + non_faces_hog
+        train_labels = [FACE] * len(faces_hog) + [NON_FACE] * len(non_faces_hog)
+
+        self.clf.fit(train_data, train_labels)
+
+    def _predict(self, vec):
+        scores = self.clf.decision_function(vec)
+        idx = (scores > BINARY_THRESHOLD).astype(int)
+        return self.clf.classes_[idx], scores
+
+    def test(self, faces: Iterable[np.ndarray], non_faces: Iterable[np.ndarray]):
+        faces_hog = [hog(face) for face in faces]
+        non_faces_hog = [hog(non_face) for non_face in non_faces]
+
+        test_data = faces_hog + non_faces_hog
+        test_labels = [FACE] * len(faces_hog) + [NON_FACE] * len(non_faces_hog)
+
+        return metrics.accuracy_score(test_labels, self._predict(test_data))
 
     @staticmethod
     def _iou(a: BoxType, b: BoxType) -> float:
@@ -68,8 +98,9 @@ class FaceDetector:
                 window: np.ndarray = scaled_img[startX:endX, startY:endY]
                 hog_img: np.ndarray = hog(window)
 
-                prediction, score = predict_with_score(self.clf, hog_img)
-                if prediction == FACE and score > BINARY_THRESHOLD:
+                predictions, scores = self._predict([hog_img])
+                prediction, score = predictions[0], scores[0]
+                if prediction == FACE:
                     # boxes.append(BoxType(startX, startY, endX, endY, score, scale))
                     boxes.append(
                         BoxType(
@@ -118,6 +149,3 @@ class FaceDetector:
             return __class__._nms(self._detect(img, scales[0]))
         else:
             return self._detect_with_scales(img, scales)
-
-    def extract(self, img: np.ndarray, boxes: list[BoxType]) -> list[np.ndarray]:
-        return [np.copy(img[x1:x2, y1:y2]) for x1, y1, x2, y2, *_ in boxes]
