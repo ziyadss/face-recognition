@@ -67,7 +67,6 @@ class Preprocessor:
         cos_a = (b**2 + c**2 - a**2) / (2 * b * c)
         angle = np.degrees(np.arccos(cos_a))
 
-        # angle = -direction * (90 - angle)
         if direction == -1:
             angle = 90 - angle
 
