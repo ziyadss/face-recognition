@@ -48,14 +48,13 @@ if __name__ == "__main__":
     with open("data/filtered_information.csv", "r") as fd:
         reader = csv.reader(fd)
         next(reader)
-        print("Splitting data...")
         for row in reader:
-            print(f"Row: {i}", end="\r")
             i += 1
             if i % RATIO_MOD != 0:
                 training_data.append(row)
             else:
                 testing_data.append(row)
+    print(f"Training data: {len(training_data)}, testing data: {len(testing_data)}")
 
     # Modules
     detector = FaceDetector()

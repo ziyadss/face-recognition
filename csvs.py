@@ -12,16 +12,11 @@ IMAGES_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
 #     boxes_reader = csv.reader(boxes_file)
 #     identities_reader = csv.reader(identities_file)
 
-#     # Open the output file in write mode
 #     with open("data/information.csv", "w") as output_file:
-#         # Create a CSV writer for the output file
 #         output_writer = csv.writer(output_file, lineterminator="\n")
 
-#         # Iterate over the rows in both files in parallel
 #         for (boxes_row, identities_row) in zip(boxes_reader, identities_reader):
-#             # Combine the rows into a single list
 #             combined_row = boxes_row + identities_row[1:]
-#             # Write the combined row to the output file
 #             output_writer.writerow(combined_row)
 
 identity_files = defaultdict(list)
