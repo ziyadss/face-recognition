@@ -47,6 +47,10 @@ with open("data/information.csv", "r") as fd:
         ):
             continue
 
+        # check window is valid (sanity, doesn't happen)
+        if x1 + w > width or y1 + h > height:
+            continue
+
         # try:
         #     io.imread(f"{IMAGES_DIR}/{file}")
         # except:
