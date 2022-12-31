@@ -2,6 +2,7 @@ import csv
 
 import numpy as np
 from skimage import transform
+import cv2
 
 from common import utils
 from detection import constants as DConstants
@@ -80,6 +81,8 @@ preprocessed_faces = preprocessor.preprocess(faces)
 recognizer.fit(preprocessed_faces, labels)
 recognizer.dump()
 
+recog = cv2.face.FisherFaceRecognizer_create()
+recog.train(np.array(preprocessed_faces), np.array(labels))
 
 # Test
 detector.load()
@@ -97,11 +100,8 @@ print(f"Recognizer score: {recognizer_score}")
 preds = recognizer.predict(preprocessed_faces)
 count = sum(1 for i in range(len(labels)) if labels[i] == preds[i])
 print(f"Predictions: {count}/{len(labels)}")
-import cv2
 
 # cv2 face recognition
-recog = cv2.face.FisherFaceRecognizer_create()
-recog.train(np.array(preprocessed_faces), np.array(labels))
 preds = [recog.predict(f)[0] for f in preprocessed_faces]
 count = sum(1 for i in range(len(labels)) if labels[i] == preds[i])
 print(f"Predictions: {count}/{len(labels)}")

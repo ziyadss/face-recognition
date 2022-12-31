@@ -54,6 +54,9 @@ print(f"Total size: {total_size / 1024 / 1024:.2f} MB")
 file_count = sum(len(v) for v in identity_files.values())
 print(f"Total files: {file_count}")
 
+identity_count = len(identity_files)
+print(f"Total identities: {identity_count}")
+
 # Write the filtered identities to a file
 with open("data/filtered_information.csv", "w") as fd:
     writer = csv.writer(fd, lineterminator="\n")
