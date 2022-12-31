@@ -1,7 +1,7 @@
 import csv
-import os
 from collections import defaultdict
 
+from skimage import io
 from get_image_size import get_image_metadata
 
 IMAGES_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
@@ -33,7 +33,7 @@ with open("data/information.csv", "r") as fd:
             continue
 
         # get the height and width of the image, if too big skip
-        max_size = 512 * 1024  # 512 KB
+        max_size = 364 * 1024  # 364 KB
         size, width, height = get_image_metadata(f"{IMAGES_DIR}/{file}", max_size)
         if (
             size > max_size
@@ -43,6 +43,11 @@ with open("data/information.csv", "r") as fd:
             or height < 75
         ):
             continue
+
+        # try:
+        #     io.imread(f"{IMAGES_DIR}/{file}")
+        # except:
+        #     continue
 
         identity = row[5]
         identity_files[identity].append((file, x1, y1, w, h, size))
@@ -58,35 +63,35 @@ print(f"Total files: {file_count}")
 identity_count = len(identity_files)
 print(f"Total identities: {identity_count}")
 
-# # Filter to identities with 30 or more files
-# identity_files = {k: v for k, v in identity_files.items() if len(v) >= 30}
+# Filter to identities with 30 or more files
+identity_files = {k: v for k, v in identity_files.items() if len(v) >= 30}
 
-# print("Before most filter:")
-# # Print total size
-# total_size = sum(size for row in identity_files.values() for _, _, _, _, _, size in row)
-# print(f"Total size: {total_size / 1024 / 1024:.2f} MB")
+print("Before most filter:")
+# Print total size
+total_size = sum(size for row in identity_files.values() for _, _, _, _, _, size in row)
+print(f"Total size: {total_size / 1024 / 1024:.2f} MB")
 
-# file_count = sum(len(v) for v in identity_files.values())
-# print(f"Total files: {file_count}")
+file_count = sum(len(v) for v in identity_files.values())
+print(f"Total files: {file_count}")
 
-# identity_count = len(identity_files)
-# print(f"Total identities: {identity_count}")
+identity_count = len(identity_files)
+print(f"Total identities: {identity_count}")
 
-# # get 60 identities with the most files
-# identity_files = dict(
-#     sorted(identity_files.items(), key=lambda x: len(x[1]), reverse=True)[:80]
-# )
+# get x identities with the most files
+identity_files = dict(
+    sorted(identity_files.items(), key=lambda x: len(x[1]), reverse=True)[:70]
+)
 
-# print("After most filter:")
-# # Print total size
-# total_size = sum(size for row in identity_files.values() for _, _, _, _, _, size in row)
-# print(f"Total size: {total_size / 1024 / 1024:.2f} MB")
+print("After most filter:")
+# Print total size
+total_size = sum(size for row in identity_files.values() for _, _, _, _, _, size in row)
+print(f"Total size: {total_size / 1024 / 1024:.2f} MB")
 
-# file_count = sum(len(v) for v in identity_files.values())
-# print(f"Total files: {file_count}")
+file_count = sum(len(v) for v in identity_files.values())
+print(f"Total files: {file_count}")
 
-# identity_count = len(identity_files)
-# print(f"Total identities: {identity_count}")
+identity_count = len(identity_files)
+print(f"Total identities: {identity_count}")
 
 # Write the filtered identities to a file
 with open("data/filtered_information.csv", "w") as fd:

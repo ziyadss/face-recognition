@@ -14,6 +14,7 @@ TRAIN_TO_TEST_RATIO = 1
 RATIO_MOD = TRAIN_TO_TEST_RATIO + 1
 IMAGES_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
 
+
 def process_data(data):
     faces = []
     non_faces = []
@@ -40,6 +41,7 @@ def process_data(data):
             non_faces.append(non_face)
 
     return faces, non_faces
+
 
 if __name__ == "__main__":
     i = 0
