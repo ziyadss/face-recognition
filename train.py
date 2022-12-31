@@ -3,7 +3,7 @@ from time import perf_counter_ns
 
 import cv2
 import numpy as np
-from skimage import transform
+from skimage import io, transform
 
 from common import utils
 from detection import constants as DConstants
@@ -31,6 +31,7 @@ with open("data/filtered_information.csv", "r") as fd:
 
 
 def process_data(data):
+    colored_faces = []
     faces = []
     non_faces = []
     labels = []
@@ -40,12 +41,13 @@ def process_data(data):
         w, h = int(row[3]), int(row[4])
         identity = int(row[5])
 
-        image = utils.read_as_float(f"{IMAGES_DIR}/{file}")
-        H, W = image.shape
+        colored = io.imread(f"{IMAGES_DIR}/{file}")
+        gray = utils.color2gray(colored)
+        H, W = gray.shape
 
-        face = transform.resize(
-            image[y1 : y1 + h, x1 : x1 + w], DConstants.WINDOW_SHAPE
-        )
+        colored_face = colored[y1 : y1 + h, x1 : x1 + w]
+        face = transform.resize(gray[y1 : y1 + h, x1 : x1 + w], DConstants.WINDOW_SHAPE)
+        colored_faces.append(colored_face)
         faces.append(face)
         labels.append(identity)
 
@@ -58,10 +60,10 @@ def process_data(data):
             if x >= x1 and x <= x1 + w and y >= y1 and y <= y1 + h:
                 continue
             count += 1
-            non_face = image[y : y + HW, x : x + WW]
+            non_face = gray[y : y + HW, x : x + WW]
             non_faces.append(non_face)
 
-    return faces, non_faces, labels
+    return colored_faces, faces, non_faces, labels
 
 
 # Modules
@@ -72,7 +74,7 @@ cv2_recognizer = cv2.face.EigenFaceRecognizer_create()
 
 # Train
 start = perf_counter_ns()
-faces, non_faces, labels = process_data(training_data)
+colored, faces, non_faces, labels = process_data(training_data)
 end = perf_counter_ns()
 print(
     f"Training faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds"
@@ -85,7 +87,7 @@ print(
 # print(f"Detector training time: {(end - start) / 1e9} seconds")
 
 start = perf_counter_ns()
-preprocessed_faces = preprocessor.preprocess(faces)
+preprocessed_faces = preprocessor.preprocess(colored)
 end = perf_counter_ns()
 print(f"Preprocessing time: {(end - start) / 1e9} seconds")
 
@@ -102,7 +104,7 @@ print(f"OpenCV Recognizer training time: {(end - start) / 1e9} seconds")
 
 # Test
 start = perf_counter_ns()
-faces, non_faces, labels = process_data(testing_data)
+colored, faces, non_faces, labels = process_data(testing_data)
 end = perf_counter_ns()
 print(
     f"Testing faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds"
@@ -112,7 +114,7 @@ detector.load()
 recognizer.load()
 
 detector_score = detector.test(faces, non_faces)
-preprocessed_faces = preprocessor.preprocess(faces)
+preprocessed_faces = preprocessor.preprocess(colored)
 recognizer_score = recognizer.score(preprocessed_faces, labels)
 
 print(f"Detector score: {detector_score}")
