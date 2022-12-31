@@ -13,7 +13,7 @@ from recognition.fisher import FisherRecognizer
 NON_FACES_COUNT = 1
 TRAIN_TO_TEST_RATIO = 5
 RATIO_MOD = TRAIN_TO_TEST_RATIO + 1
-IMAGES_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
+IMAGES_DIR = "data/PICS"
 
 i = 0
 training_data = []
