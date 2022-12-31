@@ -1,0 +1,1 @@
+OUTPUT_SHAPE = (39, 39)

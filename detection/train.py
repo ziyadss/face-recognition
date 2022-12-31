@@ -1,53 +1,88 @@
-import pickle
+import csv
 from time import perf_counter_ns
 
-from sklearn import metrics, svm
+import numpy as np
+from skimage import transform
 
-from .constants import *
-from .helpers import directory_hogs
+from common import utils
 
-print("Getting train vectors\n")
-start = perf_counter_ns()
+from .constants import WINDOW_SHAPE
+from .detector import FaceDetector
 
-faces_hog = directory_hogs(TRAIN_FACES_DIR)
-non_faces_hog = directory_hogs(TRAIN_NON_FACES_DIR)
-
-end = perf_counter_ns()
-print(f"Time: {(end - start) / 1e9} seconds")
-
-train_data = faces_hog + non_faces_hog
-train_labels = [FACE] * len(faces_hog) + [NON_FACE] * len(non_faces_hog)
-
-print(f"\nTraining on {len(train_data)} images")
-clf = svm.SVC()
-clf.fit(train_data, train_labels)
-
-print("\nSaving classifier")
-with open(CLASSIFIER_PATH, "wb") as fd:
-    pickle.dump(clf, fd)
-
-print(f"\nTesting on training images")
-train_score = clf.score(train_data, train_labels)
-print(f"Score: {train_score}")
+NON_FACES_TO_FACES_RATIO = 2
+TRAIN_TO_TEST_RATIO = 1
+RATIO_MOD = TRAIN_TO_TEST_RATIO + 1
+IMAGES_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
 
 
-print("\nGetting test vectors")
-faces_hog = directory_hogs(TEST_FACES_DIR)
-non_faces_hog = directory_hogs(TEST_NON_FACES_DIR)
+def process_data(data):
+    faces = []
+    non_faces = []
+    for row in data:
+        file = row[0]
+        x1, y1 = int(row[1]), int(row[2])
+        w, h = int(row[3]), int(row[4])
 
-test_data = faces_hog + non_faces_hog
-test_labels = [FACE] * len(faces_hog) + [NON_FACE] * len(non_faces_hog)
+        gray = utils.read_as_float(f"{IMAGES_DIR}/{file}")
+        face = transform.resize(gray[y1 : y1 + h, x1 : x1 + w], WINDOW_SHAPE)
+        faces.append(face)
 
-print(f"\nTesting on {len(test_data)} images")
-test_score = clf.score(test_data, test_labels)
-print(f"Score: {test_score}")
+        # get random boxes that are not the face
+        H, W = gray.shape
+        HW, WW = WINDOW_SHAPE
+        count = 0
+        while count < NON_FACES_TO_FACES_RATIO:
+            x = np.random.randint(0, W - WW)
+            y = np.random.randint(0, H - HW)
+            if x >= x1 and x <= x1 + w and y >= y1 and y <= y1 + h:
+                continue
+            count += 1
+            non_face = gray[y : y + HW, x : x + WW]
+            non_faces.append(non_face)
+
+    return faces, non_faces
 
 
-def predict(vec):
-    score = clf.decision_function(vec)
-    idx = (score > BINARY_THRESHOLD).astype(int)
-    return clf.classes_[idx]
+if __name__ == "__main__":
+    i = 0
+    training_data = []
+    testing_data = []
+    with open("data/detector_filtered_information.csv", "r") as fd:
+        reader = csv.reader(fd)
+        next(reader)
+        for row in reader:
+            i += 1
+            if i % RATIO_MOD != 0:
+                training_data.append(row)
+            else:
+                testing_data.append(row)
+    print(f"Training data: {len(training_data)}, testing data: {len(testing_data)}")
 
+    # Modules
+    detector = FaceDetector()
 
-new_score = metrics.accuracy_score(test_labels, predict(test_data))
-print(f"Thresholded score: {new_score}")
+    # Train
+    start = perf_counter_ns()
+    faces, non_faces = process_data(training_data)
+    end = perf_counter_ns()
+    print(
+        f"Training faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds"
+    )
+
+    start = perf_counter_ns()
+    detector.train(faces, non_faces)
+    detector.dump()
+    end = perf_counter_ns()
+    print(f"Detector training time: {(end - start) / 1e9} seconds")
+
+    # Test
+    start = perf_counter_ns()
+    faces, non_faces = process_data(testing_data)
+    end = perf_counter_ns()
+    print(
+        f"Testing faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds"
+    )
+
+    detector_score = detector.test(faces, non_faces)
+
+    print(f"Detector score: {detector_score}")

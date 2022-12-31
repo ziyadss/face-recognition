@@ -1,56 +1,38 @@
-import numpy as np
-from skimage import io, util
+from skimage import io
 
+from common import utils
 from detection.detector import FaceDetector
-from helpers import prepare_data
-from recognition.constants import TESTING_PATH, TRAINING_PATH
+from preprocessing.preprocessor import Preprocessor
 from recognition.fisher import FisherRecognizer
 
-IMAGE_DIR = "data/ziyad"
-IMAGE_NAME = "image.png"
+IMAGE_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
+IMAGE_NAME = "119408.jpg"
 IMAGE_PATH = f"{IMAGE_DIR}/{IMAGE_NAME}"
 
 
-def read_as_float(path: str) -> np.ndarray:
-    return util.img_as_float(io.imread(path, as_gray=True))
-
-
 if __name__ == "__main__":
-    scales = [0.25, 0.30, 0.35, 0.40, 0.45]
-    size = (39, 39)
-    cutoff = 5
+    colored = io.imread(IMAGE_PATH)
+    image = utils.read_as_float(IMAGE_PATH)
+    scales = [0.15, 0.20, 0.25]
 
-    training_faces, training_labels = prepare_data(
-        TRAINING_PATH, scales, size=size, start=None, limit=cutoff
-    )
-    extra_faces, extra_labels = prepare_data(
-        TRAINING_PATH, scales, size=size, start=cutoff, limit=None
-    )
-    testing_faces, testing_labels = prepare_data(
-        TESTING_PATH, scales, size=size, start=None, limit=None
-    )
+    detector = FaceDetector()
+    detector.load()
+    bb = detector.detect(image, scales)
+    # bb = [bb[0]]
+    print(bb)
+    faces = [colored[x1:x2, y1:y2] for x1, y1, x2, y2, *_ in bb]
+    for i, face in enumerate(faces):
+        io.imsave(f"face_{i}.jpg", face)
 
-    recognizer = FisherRecognizer()
+    from preprocessing.alignment import align
 
-    recognizer.fit(training_faces, training_labels)
+    out = align(faces[0])
+    io.imsave("aligned.png", out)
+    # preprocessor = Preprocessor()
+    # faces = preprocessor.preprocess(faces)
 
-    results = recognizer.predict(testing_faces)
+    # recognizer = FisherRecognizer()
+    # recognizer.load()
+    # predictions = recognizer.predict(faces)
 
-    print(testing_labels)
-    print(results)
-
-    score = recognizer.score(testing_faces, testing_labels)
-    print(score)
-
-    results = recognizer.predict(extra_faces)
-
-    print(extra_labels)
-    print(results)
-
-    score = recognizer.score(extra_faces, extra_labels)
-    print(score)
-
-    score = recognizer.score(
-        training_faces + extra_faces, training_labels + extra_labels
-    )
-    print(score)
+    # print(predictions)

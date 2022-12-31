@@ -25,7 +25,7 @@ CLASSIFIER_PATH = "detection/classifier.pkl"
 ## Detection constants
 PROCESSES_COUNT = 4
 
-BINARY_THRESHOLD = 1.1
+BINARY_THRESHOLD = 0.6
 NMS_THRESHOLD = 0.3
 
 WINDOW_SHAPE = (37, 37)
