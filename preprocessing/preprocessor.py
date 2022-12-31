@@ -76,9 +76,10 @@ class Preprocessor:
     def preprocess(
         self, images: list[np.ndarray] | Iterator[np.ndarray]
     ) -> list[np.ndarray]:
-        aligned = (self.align(image) for image in images)
+        # aligned = (self.align(image) for image in images)
 
-        grayed = (utils.color2gray(image) for image in aligned)
+        # grayed = (utils.color2gray(image) for image in aligned)
+        grayed = (utils.color2gray(image) for image in images)
 
         resized = (transform.resize(image, OUTPUT_SHAPE) for image in grayed)
 
