@@ -1,3 +1,13 @@
+"""
+get_image_size.py
+====================
+    :Name:        get_image_size
+    :Purpose:     extract image dimensions given a file path
+    :Author:      Paulo Scardine (based on code from Emmanuel VAÏSSE)
+    :Created:     26/09/2013
+    :Copyright:   (c) Paulo Scardine 2013
+    :Licence:     MIT
+"""
 import io
 import os
 import struct
