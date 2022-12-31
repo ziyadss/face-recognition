@@ -1,7 +1,9 @@
 import csv
 import os
 from collections import defaultdict
+
 from get_image_size import get_image_metadata
+
 IMAGES_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
 
 # with open("data/boxes.csv", "r") as boxes_file, open(
@@ -36,9 +38,15 @@ with open("data/information.csv", "r") as fd:
             continue
 
         # get the height and width of the image, if too big skip
-        max_size = 512 * 1024 # 512 KB
+        max_size = 512 * 1024  # 512 KB
         size, width, height = get_image_metadata(f"{IMAGES_DIR}/{file}", max_size)
-        if size > max_size or width > 1000 or height > 1000 or width < 75 or height < 75:
+        if (
+            size > max_size
+            or width > 1000
+            or height > 1000
+            or width < 75
+            or height < 75
+        ):
             continue
 
         identity = row[5]
@@ -48,7 +56,9 @@ with open("data/information.csv", "r") as fd:
 identity_files = {k: v for k, v in identity_files.items() if len(v) >= 30}
 
 # get 60 identities with the most files
-identity_files = dict(sorted(identity_files.items(), key=lambda x: len(x[1]), reverse=True)[:60])
+identity_files = dict(
+    sorted(identity_files.items(), key=lambda x: len(x[1]), reverse=True)[:60]
+)
 
 # Print total size
 total_size = sum(size for row in identity_files.values() for _, _, _, _, _, size in row)

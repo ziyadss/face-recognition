@@ -1,8 +1,6 @@
-import numpy as np
-from skimage import io, util
-
+from common import utils
 from detection.detector import FaceDetector
-from preprocessing.preprocessor import Preprocessor, PreprocessorConfiguration
+from preprocessing.preprocessor import Preprocessor
 from recognition.fisher import FisherRecognizer
 
 IMAGE_DIR = "data/ziyad"
@@ -10,24 +8,20 @@ IMAGE_NAME = "image.png"
 IMAGE_PATH = f"{IMAGE_DIR}/{IMAGE_NAME}"
 
 
-def read_as_float(path: str) -> np.ndarray:
-    return util.img_as_float(io.imread(path, as_gray=True))
-
-
 if __name__ == "__main__":
-    image = read_as_float(IMAGE_PATH)
+    image = utils.read_as_float(IMAGE_PATH)
     scales = [0.25, 0.30, 0.35]
 
     detector = FaceDetector()
+    detector.load()
     bb = detector.detect(image, scales)
-    faces = detector.extract(image, bb)
+    faces = (image[x1:x2, y1:y2] for x1, y1, x2, y2, *_ in bb)
 
-    size = (39, 39)
-    preprocessor_config = PreprocessorConfiguration(output_shape=size)
-    preprocessor = Preprocessor(preprocessor_config)
+    preprocessor = Preprocessor()
     faces = preprocessor.preprocess(faces)
 
-    recognizer = FisherRecognizer(load=True)
+    recognizer = FisherRecognizer()
+    recognizer.load()
     predictions = recognizer.predict(faces)
 
     print(predictions)

@@ -1,9 +1,9 @@
 import csv
 from time import perf_counter_ns
 
+import cv2
 import numpy as np
 from skimage import transform
-import cv2
 
 from common import utils
 from detection import constants as DConstants
@@ -74,7 +74,9 @@ cv2_recognizer = cv2.face.EigenFaceRecognizer_create()
 start = perf_counter_ns()
 faces, non_faces, labels = process_data(training_data)
 end = perf_counter_ns()
-print(f"Training faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds")
+print(
+    f"Training faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds"
+)
 
 # start = perf_counter_ns()
 # detector.train(faces, non_faces)
@@ -102,7 +104,9 @@ print(f"OpenCV Recognizer training time: {(end - start) / 1e9} seconds")
 start = perf_counter_ns()
 faces, non_faces, labels = process_data(testing_data)
 end = perf_counter_ns()
-print(f"Testing faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds")
+print(
+    f"Testing faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds"
+)
 
 detector.load()
 recognizer.load()
