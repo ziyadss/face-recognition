@@ -9,7 +9,7 @@ from common import utils
 from .constants import WINDOW_SHAPE
 from .detector import FaceDetector
 
-NON_FACES_TO_FACES_RATIO = 1
+NON_FACES_TO_FACES_RATIO = 2
 TRAIN_TO_TEST_RATIO = 1
 RATIO_MOD = TRAIN_TO_TEST_RATIO + 1
 IMAGES_DIR = "C:/Users/ziyad/Downloads/celebs/img_celeba"
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     i = 0
     training_data = []
     testing_data = []
-    with open("data/filtered_information.csv", "r") as fd:
+    with open("data/detector_filtered_information.csv", "r") as fd:
         reader = csv.reader(fd)
         next(reader)
         for row in reader:
@@ -68,8 +68,7 @@ if __name__ == "__main__":
     print(
         f"Training faces: {len(faces)}, non-faces: {len(non_faces)}, time: {(end - start) / 1e9} seconds"
     )
-    if len(faces) == 0 or len(non_faces) == 0:
-        raise Exception("No faces or non-faces found")
+
     start = perf_counter_ns()
     detector.train(faces, non_faces)
     detector.dump()
